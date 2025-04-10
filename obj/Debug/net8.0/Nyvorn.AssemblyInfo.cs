@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Nyvorn")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34e6fe881f1f8d4db63652ad53294c597afa0393")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e347dcc0f4fcb1fb421c555d7daba263d0068ff5")]
 [assembly: System.Reflection.AssemblyProductAttribute("Nyvorn")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Nyvorn")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

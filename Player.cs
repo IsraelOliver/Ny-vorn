@@ -6,23 +6,23 @@ namespace Nyvorn;
 
 public class Player
 {
-    Animation animation;
-    Vector2 Position;
-
-    float playerSpeed = 100f;
-
+    private Vector2 Position;
+    private Animation animation;
+    private float playerSpeed = 100f;
     private bool facingLeft = true;
 
     public Player(Texture2D spriteSheet)
     {
         animation = new Animation(spriteSheet, 17, 23, 16, 0.05);
-        Position = new Vector2(100, 100);
+        Position = new Vector2(100, 100); // Irá mudar futuramente quando adicionar um mapa
     }
 
     public void Move(GameTime gameTime)
     {
         KeyboardState kState = Keyboard.GetState();
-        float updateSpeed = playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float updateSpeed = playerSpeed * deltaTime;
 
         if (kState.IsKeyDown(Keys.W))
         {
