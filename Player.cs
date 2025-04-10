@@ -6,15 +6,17 @@ namespace Nyvorn;
 
 public class Player
 {
-    public Rectangle rect;
+    Animation animation;
+    Vector2 Position;
+
     float playerSpeed = 100f;
 
-    Texture2D pixels;
+    private bool facingLeft = true;
 
-    public Player(Texture2D texture)
+    public Player(Texture2D spriteSheet)
     {
-        rect = new Rectangle(100, 100, 272, 23);
-        pixels = texture;
+        animation = new Animation(spriteSheet, 17, 23, 16, 0.05);
+        Position = new Vector2(100, 100);
     }
 
     public void Move(GameTime gameTime)
@@ -24,29 +26,33 @@ public class Player
 
         if (kState.IsKeyDown(Keys.W))
         {
-            rect.Y -= (int)updateSpeed; 
+            Position.Y -= (int)updateSpeed; 
         }
         if (kState.IsKeyDown(Keys.S))
         {
-            rect.Y += (int)updateSpeed;
+            Position.Y += (int)updateSpeed;
         }
         if (kState.IsKeyDown(Keys.A))
         {
-            rect.X -= (int)updateSpeed;
+            Position.X -= (int)updateSpeed;
+            facingLeft = true;
         }
         if (kState.IsKeyDown(Keys.D))
         {
-            rect.X += (int)updateSpeed;
+            Position.X += (int)updateSpeed;
+            facingLeft = false;
         }
 
     }
-    
+
     public void Update(GameTime gameTime)
     {
         Move(gameTime);
+        animation.Update(gameTime);
     }
     public void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(pixels, rect, Color.White); 
+        SpriteEffects spriteEffect = facingLeft ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+        animation.Draw(spriteBatch, Position, spriteEffect); 
     }
 }
