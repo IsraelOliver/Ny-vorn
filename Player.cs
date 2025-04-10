@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Nyvorn;
@@ -6,13 +7,16 @@ namespace Nyvorn;
 public class Player
 {
     public Rectangle rect;
-    public Player()
+    Texture2D pixels;
+
+    public Player(Texture2D texture)
     {
         rect = new Rectangle(100, 100, 272, 23);
+        pixels = texture;
     }
     public void Update(GameTime gameTime){}
-    public void Draw()
+    public void Draw(SpriteBatch spriteBatch)
     {
-        Globals.spriteBatch.Draw(Globals.pixel, rect, Color.White); 
+        spriteBatch.Draw(pixels, rect, Color.White); 
     }
 }
