@@ -8,9 +8,7 @@ public class Player
 {   
     //Variáveis
     private Vector2 Position;
-    private Animation walkAnimation;
-    private Animation idleAnimation;
-    private Animation currentAnimation;
+    private ManagerAnimation animManager;
     private float playerSpeed = 100f;
     private bool facingLeft = true;
     private bool isMoving = false;
@@ -18,9 +16,7 @@ public class Player
     //Contrutor da classe PLayer
     public Player(Texture2D spriteSheet)
     {
-        walkAnimation = new Animation(spriteSheet, 17, 23, 15, 0, 0.05);
-        idleAnimation = new Animation(spriteSheet, 17, 23, 1, 1, 0);
-        currentAnimation = idleAnimation;
+        animManager = new ManagerAnimation(spriteSheet);
         Position = new Vector2(100, 100); // Irá mudar futuramente quando adicionar um mapa e gravidade
     }
 
@@ -28,7 +24,7 @@ public class Player
     public void Move(GameTime gameTime)
     {
         KeyboardState kState = Keyboard.GetState(); // Detecta o estado do teclado
-        isMoving = false;
+        isMoving = false; // Define o movimento como parado(false)
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float updateSpeed = playerSpeed * deltaTime; //Atualiza a velocidade.
@@ -56,19 +52,20 @@ public class Player
             facingLeft = false;
         }
 
-        currentAnimation = isMoving ? walkAnimation : idleAnimation;
+        //Especifica qual animação usar dependendo do que o player está fazendo.
+        animManager.TrocarEstado(isMoving ? AnimationState.Walking : AnimationState.Idle);
 
     }
 
     public void Update(GameTime gameTime)
     {
         Move(gameTime);
-        currentAnimation.Update(gameTime);
+        animManager.Update(gameTime);
     }
     public void Draw(SpriteBatch spriteBatch)
     {   
         //Efeito para virar para direita
         SpriteEffects spriteEffect = facingLeft ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-        currentAnimation.Draw(spriteBatch, Position, spriteEffect); 
+        animManager.Draw(spriteBatch, Position, spriteEffect); 
     }
 }
