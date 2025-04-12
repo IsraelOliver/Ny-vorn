@@ -6,12 +6,13 @@ namespace Nyvorn;
 
 public class Game1 : Game
 {
+    //Variáveis
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Texture2D spriteSheet;
-    
-    Player player;
+    private Player player;
 
+    //Contrutor da classe Game1
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -29,8 +30,8 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        spriteSheet = Content.Load<Texture2D>("player/smileyAnimation");
 
+        spriteSheet = Content.Load<Texture2D>("player/playerAnimation");
         player = new Player(spriteSheet);
 
         // TODO: use this.Content to load your game content here

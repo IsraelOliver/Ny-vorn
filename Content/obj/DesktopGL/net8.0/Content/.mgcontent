@@ -4,7 +4,7 @@
   <Platform>DesktopGL</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/Israel/Desktop/Israel/DotNet/Projetos C#/Ny'vorn/Nyvorn/Content/player/smileyAnimation.png</File>
+    <File>C:/Users/Israel/Desktop/Israel/DotNet/Projetos C#/Ny'vorn/Nyvorn/Content/player/playerAnimation.png</File>
   </SourceFiles>
   <DestFiles>
     <File xsi:nil="true" />

@@ -24,4 +24,4 @@ c:\Users\Israel\Desktop\Israel\DotNet\Projetos C#\Ny'vorn\Nyvorn\obj\Debug\net8.
 c:\Users\Israel\Desktop\Israel\DotNet\Projetos C#\Ny'vorn\Nyvorn\obj\Debug\net8.0\Nyvorn.pdb
 c:\Users\Israel\Desktop\Israel\DotNet\Projetos C#\Ny'vorn\Nyvorn\obj\Debug\net8.0\Nyvorn.genruntimeconfig.cache
 c:\Users\Israel\Desktop\Israel\DotNet\Projetos C#\Ny'vorn\Nyvorn\obj\Debug\net8.0\ref\Nyvorn.dll
-C:\Users\Israel\Desktop\Israel\DotNet\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\Content\player\smileyAnimation.xnb
+c:\Users\Israel\Desktop\Israel\DotNet\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\Content\player\playerAnimation.xnb
