@@ -53,7 +53,7 @@ public class Player
         }
 
         //Especifica qual animação usar dependendo do que o player está fazendo.
-        animManager.TrocarEstado(isMoving ? AnimationState.Walking : AnimationState.Idle);
+        animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
 
     }
 

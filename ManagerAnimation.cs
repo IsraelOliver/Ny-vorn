@@ -6,25 +6,25 @@ namespace Nyvorn;
 
 public class ManagerAnimation
 {
-    private Dictionary<AnimationState, Animation> animations;
+    private Dictionary<AnimationState, Animation> playerAnimations;
 
     public Animation CurrentAnimation { get; private set; }
 
     public ManagerAnimation(Texture2D spriteSheet)
     {
-        animations = new Dictionary<AnimationState, Animation>();
+        playerAnimations = new Dictionary<AnimationState, Animation>();
 
-        animations[AnimationState.Idle] = new Animation(spriteSheet, 17, 23, 1, 1, 0);
-        animations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0.05);
+        playerAnimations[AnimationState.Idle] = new Animation(spriteSheet, 17, 23, 1, 1, 0);
+        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0.05);
 
-        CurrentAnimation = animations[AnimationState.Idle];
+        CurrentAnimation = playerAnimations[AnimationState.Idle];
     }
 
     public void ChangeState(AnimationState newState)
     {
-        if (CurrentAnimation != animations[newState])
+        if (CurrentAnimation != playerAnimations[newState])
         {
-            CurrentAnimation = animations[newState];
+            CurrentAnimation = playerAnimations[newState];
         }
     }
 
