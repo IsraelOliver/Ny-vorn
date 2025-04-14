@@ -20,6 +20,7 @@ public class ManagerAnimation
         CurrentAnimation = playerAnimations[AnimationState.Idle];
     }
 
+    //Trocar o estado da animação
     public void ChangeState(AnimationState newState)
     {
         if (CurrentAnimation != playerAnimations[newState])
