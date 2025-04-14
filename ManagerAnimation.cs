@@ -15,7 +15,7 @@ public class ManagerAnimation
         playerAnimations = new Dictionary<AnimationState, Animation>();
 
         playerAnimations[AnimationState.Idle] = new Animation(spriteSheet, 17, 23, 1, 1, 0);
-        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0.05);
+        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0.04);
 
         CurrentAnimation = playerAnimations[AnimationState.Idle];
     }
