@@ -9,13 +9,15 @@ public class ManagerAnimation
     private Dictionary<AnimationState, Animation> playerAnimations;
 
     public Animation CurrentAnimation { get; private set; }
+    public int FrameWidth => CurrentAnimation.FrameWidth;
+    public int FrameHeight => CurrentAnimation.FrameHeight;
 
     public ManagerAnimation(Texture2D spriteSheet)
     {
         playerAnimations = new Dictionary<AnimationState, Animation>();
 
         playerAnimations[AnimationState.Idle] = new Animation(spriteSheet, 17, 23, 1, 1, 0);
-        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0.04);
+        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0.03);
 
         CurrentAnimation = playerAnimations[AnimationState.Idle];
     }
