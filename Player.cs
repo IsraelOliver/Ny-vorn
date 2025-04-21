@@ -56,6 +56,11 @@ public class Player
 
     }
 
+    public Vector2 GetPosition()
+    {
+        return Position;
+    }
+
     //Metodo para aplicar a gravidade ao player || FUTURAMENTE TERÁ SUA PROPRIA CLASSE
     private void ApplyGravity(GameTime gameTime)
     {
