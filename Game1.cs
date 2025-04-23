@@ -12,6 +12,8 @@ public class Game1 : Game
     private Texture2D spriteSheet;
     private Texture2D tileTexture;
     private Player player;
+    private Camera2D camera;
+
 
     public static Texture2D debugTexture; //boundingbox visible
 
@@ -80,6 +82,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
         tileTexture = Content.Load<Texture2D>("tileMap/orange");
 
@@ -98,6 +101,7 @@ public class Game1 : Game
             Exit();
 
         // TODO: Add your update logic here
+        camera.Follow(player.GetPosition());
         player.Update(gameTime);
 
         base.Update(gameTime);
@@ -108,9 +112,8 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         // TODO: Add your drawing code here
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(transformMatrix: camera.Transform);
         player.Draw(_spriteBatch);
-        player.DrawDebug(_spriteBatch);
 
         for (int y = 0; y < map.GetLength(0); y++)
         {
