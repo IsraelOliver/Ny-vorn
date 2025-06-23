@@ -18,7 +18,9 @@ public class Player
     public Player(Texture2D spriteSheet)
     {
         animManager = new ManagerAnimation(spriteSheet);
-        Position = new Vector2(100, 100); // Irá mudar futuramente quando adicionar um mapa e gravidade
+        Position = new Vector2(10, 10); // Irá mudar futuramente quando adicionar um mapa e gravidade
+        int width = animManager.FrameWidth;
+        int height = animManager.FrameHeight;
     }
 
     //Método para movimentação
