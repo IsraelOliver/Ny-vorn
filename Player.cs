@@ -13,12 +13,11 @@ public class Player
     private bool facingLeft = true;
     private bool isMoving = false;
 
-
     //Contrutor da classe PLayer
     public Player(Texture2D spriteSheet)
     {
         animManager = new ManagerAnimation(spriteSheet);
-        Position = new Vector2(10, 10); // Irá mudar futuramente quando adicionar um mapa e gravidade
+        Position = new Vector2(100, 100); // Irá mudar futuramente quando adicionar um mapa e gravidade
         int width = animManager.FrameWidth;
         int height = animManager.FrameHeight;
     }
@@ -68,6 +67,16 @@ public class Player
         return Position;
     }
 
+    public Rectangle GetBounds()
+    {
+        return new Rectangle(
+            (int)Position.X,
+            (int)Position.Y,
+            animManager.FrameWidth,
+            animManager.FrameHeight
+        );
+    }
+
     public void Update(GameTime gameTime)
     {
         Move(gameTime);
@@ -75,7 +84,7 @@ public class Player
     }
     public void Draw(SpriteBatch spriteBatch)
     {   
-        //Efeito para virar para direita
+        //Efeito para virar para o lado certo.
         SpriteEffects spriteEffect = facingLeft ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
         animManager.Draw(spriteBatch, Position, spriteEffect); 
     }
