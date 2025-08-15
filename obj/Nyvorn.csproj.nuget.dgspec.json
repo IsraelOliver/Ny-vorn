@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Israel\\Desktop\\Israel\\DotNet\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj": {}
+    "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Israel\\Desktop\\Israel\\DotNet\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj": {
+    "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Israel\\Desktop\\Israel\\DotNet\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
+        "projectUniqueName": "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
         "projectName": "Nyvorn",
-        "projectPath": "C:\\Users\\Israel\\Desktop\\Israel\\DotNet\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
+        "projectPath": "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
         "packagesPath": "C:\\Users\\Israel\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Israel\\Desktop\\Israel\\DotNet\\Projetos C#\\Ny'vorn\\Nyvorn\\obj\\",
+        "outputPath": "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Israel\\AppData\\Roaming\\NuGet\\NuGet.Config"

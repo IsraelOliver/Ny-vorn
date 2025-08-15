@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Nyvorn
-build_property.ProjectDir = C:\Users\Israel\Desktop\Israel\DotNet\Projetos C#\Ny'vorn\Nyvorn\
+build_property.ProjectDir = c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
