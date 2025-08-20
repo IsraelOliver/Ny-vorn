@@ -27,6 +27,7 @@ public class Animation
         Row = row;
         TimePerFrame = timePerFrame;
 
+        sourceRect = new Rectangle(0, row * frameHeight, frameWidth, frameHeight);
     }
     public void Update(GameTime gameTime)
     {
@@ -40,9 +41,10 @@ public class Animation
                 currentFrame = 0;
             }
 
-            sourceRect = new Rectangle(currentFrame * FrameWidth, Row * FrameHeight, FrameWidth, FrameHeight);
             timer = 0;
         }
+
+        sourceRect = new Rectangle(currentFrame * FrameWidth, Row * FrameHeight, FrameWidth, FrameHeight);
     }
 
     public void Draw(SpriteBatch spriteBatch, Vector2 Position, SpriteEffects effects)

@@ -30,9 +30,6 @@ public class Player
 
     public Vector2 GetPosition() => Position;
 
-    public Rectangle GetBounds()
-        => new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
-
     public void Update(GameTime gameTime)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -57,7 +54,7 @@ public class Player
         // Gravidade
         Velocity.Y += gravity * dt;
 
-        // --- Integrate + colisão por eixo ---
+        // colisão por eixo
         MoveAxis(Velocity.X * dt, 0f); // X
         MoveAxis(0f, Velocity.Y * dt); // Y
 
