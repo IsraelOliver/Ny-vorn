@@ -17,7 +17,7 @@ public class Player
     // Tunáveis
     private float moveSpeed = 120f;
     private float gravity   = 1800f;
-    private float jumpSpeed = 480f;
+    private float jumpSpeed = 500f;
     private const float Skin = 1f; // margem anti-quinas
 
     private ManagerAnimation animManager;
@@ -39,8 +39,20 @@ public class Player
         isMoving = false;
         float vx = 0f;
 
-        if (k.IsKeyDown(Keys.A)) { vx -= moveSpeed; isMoving = true; facingLeft = true; }
-        if (k.IsKeyDown(Keys.D)) { vx += moveSpeed; isMoving = true; facingLeft = false; }
+        if (k.IsKeyDown(Keys.A))
+        {
+            vx -= moveSpeed;
+            isMoving = true;
+            facingLeft = true;
+            if (k.IsKeyDown(Keys.LeftShift)) { moveSpeed = 160f; }
+        }
+        if (k.IsKeyDown(Keys.D))
+        {
+            vx += moveSpeed;
+            isMoving = true;
+            facingLeft = false;
+            if (k.IsKeyDown(Keys.LeftShift)) { moveSpeed = 160f; }
+        }
 
         Velocity.X = vx;
 
@@ -89,12 +101,7 @@ public class Player
         int minY = Math.Max(0, (aabb.Top    + (int)Math.Min(0, dy) - (int)Skin) / tileSize);
         int maxY = Math.Max(0, (aabb.Bottom + (int)Math.Max(0, dy) + (int)Skin - 1) / tileSize);
 
-<<<<<<< HEAD
         //OnGround = (dy > 0) ? false : OnGround; a linha que esta causando tanto bugs
-=======
-        //OnGround = (dy > 0) ? false : OnGround;
-
->>>>>>> 10bba5d (Arrumando bug visual do pulo)
 
         for (int ty = minY; ty <= maxY; ty++)
         {
