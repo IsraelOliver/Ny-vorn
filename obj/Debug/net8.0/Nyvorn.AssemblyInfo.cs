@@ -13,7 +13,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Nyvorn")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
+<<<<<<< HEAD
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0e8000dcb1a5e03506ff0ecbb56fe48b9393bd93")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b1ae1c0c69c8394095c789085c0466d239676c3")]
+>>>>>>> 10bba5d (Arrumando bug visual do pulo)
 [assembly: System.Reflection.AssemblyProductAttribute("Nyvorn")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Nyvorn")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

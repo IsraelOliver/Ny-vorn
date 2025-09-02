@@ -63,9 +63,11 @@ public class Player
         {
             animManager.ChangeState(AnimationState.Jump);
         }
-        else {
+        else
+        {
             animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
         }
+
         animManager.Update(gameTime);
     }
 
@@ -87,7 +89,12 @@ public class Player
         int minY = Math.Max(0, (aabb.Top    + (int)Math.Min(0, dy) - (int)Skin) / tileSize);
         int maxY = Math.Max(0, (aabb.Bottom + (int)Math.Max(0, dy) + (int)Skin - 1) / tileSize);
 
+<<<<<<< HEAD
         //OnGround = (dy > 0) ? false : OnGround; a linha que esta causando tanto bugs
+=======
+        //OnGround = (dy > 0) ? false : OnGround;
+
+>>>>>>> 10bba5d (Arrumando bug visual do pulo)
 
         for (int ty = minY; ty <= maxY; ty++)
         {
@@ -123,7 +130,6 @@ public class Player
                 }
             }
         }
-
         Position = new Vector2(aabb.X, aabb.Y);
     }
 
