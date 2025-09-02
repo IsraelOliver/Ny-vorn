@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Yg2NhQCHvWw=",
+  "dgSpecHash": "QhGbCRtsmcQ=",
   "success": true,
-  "projectFilePath": "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
+  "projectFilePath": "C:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Israel\\.nuget\\packages\\monogame.content.builder.task\\3.8.2.1105\\monogame.content.builder.task.3.8.2.1105.nupkg.sha512",
     "C:\\Users\\Israel\\.nuget\\packages\\monogame.extended\\4.0.4\\monogame.extended.4.0.4.nupkg.sha512",
