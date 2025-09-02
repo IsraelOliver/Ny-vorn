@@ -4,9 +4,9 @@
   <Platform>DesktopGL</Platform>
   <Config />
   <SourceFiles>
-    <File>c:/Users/hhhhi/Desktop/Projeto/Ny-vorn/Content/player/playerAnimation.png</File>
-    <File>c:/Users/hhhhi/Desktop/Projeto/Ny-vorn/Content/tileMap/dirt_tile.png</File>
-    <File>c:/Users/hhhhi/Desktop/Projeto/Ny-vorn/Content/tileMap/orange.png</File>
+    <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/player/playerAnimation.png</File>
+    <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/tileMap/dirt_tile.png</File>
+    <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/tileMap/orange.png</File>
   </SourceFiles>
   <DestFiles>
     <File xsi:nil="true" />

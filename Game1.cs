@@ -62,8 +62,6 @@ public class Game1 : Game
         return map[tileY, tileX] == 1;
     }
 
-    // MAPA //
-
     //Contrutor da classe Game1
     public Game1()
     {

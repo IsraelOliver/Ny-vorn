@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\hhhhi\\Desktop\\Projeto\\Ny-vorn\\Nyvorn.csproj": {}
+    "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj": {}
   },
   "projects": {
-    "c:\\Users\\hhhhi\\Desktop\\Projeto\\Ny-vorn\\Nyvorn.csproj": {
+    "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\hhhhi\\Desktop\\Projeto\\Ny-vorn\\Nyvorn.csproj",
+        "projectUniqueName": "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
         "projectName": "Nyvorn",
-        "projectPath": "c:\\Users\\hhhhi\\Desktop\\Projeto\\Ny-vorn\\Nyvorn.csproj",
-        "packagesPath": "C:\\Users\\hhhhi\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\hhhhi\\Desktop\\Projeto\\Ny-vorn\\obj\\",
+        "projectPath": "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\Nyvorn.csproj",
+        "packagesPath": "C:\\Users\\Israel\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\Israel\\Desktop\\Israel\\Programação\\Game Project - C#\\Projetos C#\\Ny'vorn\\Nyvorn\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\hhhhi\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Israel\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -37,8 +37,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -47,6 +46,10 @@
             "MonoGame.Content.Builder.Task": {
               "target": "Package",
               "version": "[3.8.2.1105, )"
+            },
+            "MonoGame.Extended": {
+              "target": "Package",
+              "version": "[4.0.4, )"
             },
             "MonoGame.Framework.DesktopGL": {
               "target": "Package",
@@ -64,30 +67,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.19, 8.0.19]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.19, 8.0.19]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.19, 8.0.19]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.19, 8.0.19]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.406/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

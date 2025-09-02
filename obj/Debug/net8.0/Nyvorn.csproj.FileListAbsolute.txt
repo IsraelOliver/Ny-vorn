@@ -85,6 +85,7 @@ C:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vo
 C:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\obj\Debug\net8.0\Nyvorn.pdb
 C:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\obj\Debug\net8.0\Nyvorn.genruntimeconfig.cache
 C:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\obj\Debug\net8.0\ref\Nyvorn.dll
+<<<<<<< HEAD
 C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\bin\Debug\net8.0\Content\player\playerAnimation.xnb
 C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\bin\Debug\net8.0\Content\tileMap\dirt_tile.xnb
 C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\bin\Debug\net8.0\Content\tileMap\orange.xnb
@@ -114,3 +115,6 @@ C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\obj\Debug\net8.0\refint\Nyvorn.dll
 C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\obj\Debug\net8.0\Nyvorn.pdb
 C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\obj\Debug\net8.0\Nyvorn.genruntimeconfig.cache
 C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\obj\Debug\net8.0\ref\Nyvorn.dll
+=======
+c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\MonoGame.Extended.dll
+>>>>>>> 2b1ae1c (Adicionando animação de Pulo!])

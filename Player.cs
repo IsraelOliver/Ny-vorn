@@ -15,9 +15,9 @@ public class Player
     private bool OnGround = false;
 
     // Tunáveis
-    private float moveSpeed = 140f;
+    private float moveSpeed = 120f;
     private float gravity   = 1800f;
-    private float jumpSpeed = 520f;
+    private float jumpSpeed = 480f;
     private const float Skin = 1f; // margem anti-quinas
 
     private ManagerAnimation animManager;
@@ -34,7 +34,7 @@ public class Player
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        // --- INPUT -> Velocity.X ---
+        // Andar
         KeyboardState k = Keyboard.GetState();
         isMoving = false;
         float vx = 0f;
@@ -44,7 +44,7 @@ public class Player
 
         Velocity.X = vx;
 
-        // Jump
+        // Pulo
         if (k.IsKeyDown(Keys.Space) && OnGround)
         {
             Velocity.Y = -jumpSpeed;
@@ -54,12 +54,18 @@ public class Player
         // Gravidade
         Velocity.Y += gravity * dt;
 
-        // colisão por eixo
+        // Colisão
         MoveAxis(Velocity.X * dt, 0f); // X
         MoveAxis(0f, Velocity.Y * dt); // Y
 
         // Animação
-        animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
+        if (!OnGround)
+        {
+            animManager.ChangeState(AnimationState.Jump);
+        }
+        else {
+            animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
+        }
         animManager.Update(gameTime);
     }
 
@@ -81,7 +87,7 @@ public class Player
         int minY = Math.Max(0, (aabb.Top    + (int)Math.Min(0, dy) - (int)Skin) / tileSize);
         int maxY = Math.Max(0, (aabb.Bottom + (int)Math.Max(0, dy) + (int)Skin - 1) / tileSize);
 
-        OnGround = (dy > 0) ? false : OnGround;
+        //OnGround = (dy > 0) ? false : OnGround; a linha que esta causando tanto bugs
 
         for (int ty = minY; ty <= maxY; ty++)
         {
