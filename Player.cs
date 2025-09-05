@@ -7,12 +7,15 @@ namespace Nyvorn;
 
 public class Player
 {
+
     // Estado básico
     private Vector2 Position;
     private Vector2 Velocity;
     private bool facingLeft = true;
     private bool isMoving = false;
     private bool OnGround = false;
+
+    public Vector2 GetPosition() => Position;
 
     // Tunáveis
     private float moveSpeed = 120f;
@@ -27,8 +30,6 @@ public class Player
         animManager = new ManagerAnimation(spriteSheet);
         Position = new Vector2(100, 100);
     }
-
-    public Vector2 GetPosition() => Position;
 
     public void Update(GameTime gameTime)
     {
@@ -101,7 +102,7 @@ public class Player
         int minY = Math.Max(0, (aabb.Top    + (int)Math.Min(0, dy) - (int)Skin) / tileSize);
         int maxY = Math.Max(0, (aabb.Bottom + (int)Math.Max(0, dy) + (int)Skin - 1) / tileSize);
 
-        //OnGround = (dy > 0) ? false : OnGround; a linha que esta causando tanto bugs
+        OnGround = (dy > 1) ? false : OnGround; //a linha que esta causando tanto bugs
 
         for (int ty = minY; ty <= maxY; ty++)
         {

@@ -20,8 +20,8 @@ public class Camera2D
         position = target;
 
         var positionCentered = new Vector2(
-            target.X - viewportWidth / 2,
-            target.Y - viewportHeight / 2
+            position.X - viewportWidth / 2,
+            position.Y - viewportHeight / 2
         );
 
         Transform = Matrix.CreateTranslation(new Vector3(-positionCentered, 0));

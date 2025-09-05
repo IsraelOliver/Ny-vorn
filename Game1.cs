@@ -14,9 +14,6 @@ public class Game1 : Game
     private Player player;
     private Camera2D camera;
 
-
-    public static Texture2D debugTexture; //boundingbox visible
-
     // MAPA //
     public static int tileSize = 23;
 
@@ -83,9 +80,6 @@ public class Game1 : Game
         camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
         tileTexture = Content.Load<Texture2D>("tileMap/orange");
-
-        debugTexture = new Texture2D(GraphicsDevice, 1, 1);
-        debugTexture.SetData(new[] { Color.White });
 
         spriteSheet = Content.Load<Texture2D>("player/playerAnimation");
         player = new Player(spriteSheet);
