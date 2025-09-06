@@ -18,8 +18,9 @@ public class Player
     public Vector2 GetPosition() => Position;
 
     // Tunáveis
-    private float moveSpeed = 120f;
-    private float gravity   = 1800f;
+    private float walkSpeed = 120f;
+    private float sprintSpeed = 200f;
+    private float gravity = 1800f;
     private float jumpSpeed = 500f;
     private const float Skin = 1f; // margem anti-quinas
 
@@ -40,19 +41,19 @@ public class Player
         isMoving = false;
         float vx = 0f;
 
+        float speed = (k.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed);
+
         if (k.IsKeyDown(Keys.A))
         {
-            vx -= moveSpeed;
+            vx -= speed;
             isMoving = true;
             facingLeft = true;
-            if (k.IsKeyDown(Keys.LeftShift)) { moveSpeed = 160f; }
         }
         if (k.IsKeyDown(Keys.D))
         {
-            vx += moveSpeed;
+            vx += speed;
             isMoving = true;
             facingLeft = false;
-            if (k.IsKeyDown(Keys.LeftShift)) { moveSpeed = 160f; }
         }
 
         Velocity.X = vx;
@@ -72,6 +73,7 @@ public class Player
         MoveAxis(0f, Velocity.Y * dt); // Y
 
         // Animação
+
         if (!OnGround)
         {
             animManager.ChangeState(AnimationState.Jump);
@@ -102,7 +104,7 @@ public class Player
         int minY = Math.Max(0, (aabb.Top    + (int)Math.Min(0, dy) - (int)Skin) / tileSize);
         int maxY = Math.Max(0, (aabb.Bottom + (int)Math.Max(0, dy) + (int)Skin - 1) / tileSize);
 
-        OnGround = (dy > 1) ? false : OnGround; //a linha que esta causando tanto bugs
+        OnGround = (dy > 1) ? false : OnGround; //agora funciona, desde que mantenha em 1.
 
         for (int ty = minY; ty <= maxY; ty++)
         {
