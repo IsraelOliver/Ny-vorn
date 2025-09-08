@@ -26,7 +26,6 @@ public class Player
     private const float Skin = 1f; // margem anti-quinas
 
     private ManagerAnimation animManager;
-    private Animation anim;
 
     public Player(Texture2D spriteSheet)
     {
