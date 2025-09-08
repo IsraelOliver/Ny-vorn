@@ -10,6 +10,9 @@ public class Animation
     public int FrameWidth { get; set; }
     public int FrameHeight { get; set; }
     public int TotalFrame { get; set; }
+    public int StartColumn { get; set; }
+    public bool Loop { get; set; } = true;
+    public bool IsFinished { get; set; } = false;
     public int Row { get; set; }
     public double TimePerFrame { get; set; }
 
@@ -18,33 +21,53 @@ public class Animation
     private Rectangle sourceRect;
 
     //Contrutor da classe Animation
-    public Animation(Texture2D texture, int frameWidth, int frameHeight, int totalFrame, int row, double timePerFrame)
+    public Animation(Texture2D texture, int frameWidth, int frameHeight, int totalFrame, int row, int startColumn, double timePerFrame, bool loop = true)
     {
         Texture = texture;
         FrameWidth = frameWidth;
         FrameHeight = frameHeight;
         TotalFrame = totalFrame;
         Row = row;
+        StartColumn = startColumn;   // <<< usa offset
         TimePerFrame = timePerFrame;
+        Loop = loop;
 
-        sourceRect = new Rectangle(0, row * frameHeight, frameWidth, frameHeight);
+        sourceRect = new Rectangle(StartColumn * frameWidth, row * frameHeight, frameWidth, frameHeight);
     }
     public void Update(GameTime gameTime)
     {
+        if (IsFinished) return; // se não loopa e já acabou
+
         timer += gameTime.ElapsedGameTime.TotalSeconds;
 
         if (timer >= TimePerFrame)
         {
+            timer = 0;
             currentFrame++;
+
             if (currentFrame >= TotalFrame)
             {
-                currentFrame = 0;
+                if (Loop)
+                {
+                    currentFrame = 0;
+                }
+                else
+                {
+                    currentFrame = TotalFrame - 1; // trava no último frame
+                    IsFinished = true;
+                }
             }
-
-            timer = 0;
         }
 
-        sourceRect = new Rectangle(currentFrame * FrameWidth, Row * FrameHeight, FrameWidth, FrameHeight);
+        int column = StartColumn + currentFrame; // <<< aplica offset
+        sourceRect = new Rectangle(column * FrameWidth, Row * FrameHeight, FrameWidth, FrameHeight);
+    }
+
+    public void Reset()
+    {
+        timer = 0;
+        currentFrame = 0;
+        IsFinished = false;
     }
 
     public void Draw(SpriteBatch spriteBatch, Vector2 Position, SpriteEffects effects)

@@ -4,5 +4,6 @@ public enum AnimationState
 {
     Idle,
     Jump,
-    Walking
+    Walking,
+    Attack
 }

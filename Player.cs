@@ -16,6 +16,7 @@ public class Player
     private bool OnGround = false;
 
     public Vector2 GetPosition() => Position;
+    private MouseState prevMouse, currMouse;
 
     // Tunáveis
     private float walkSpeed = 120f;
@@ -25,6 +26,7 @@ public class Player
     private const float Skin = 1f; // margem anti-quinas
 
     private ManagerAnimation animManager;
+    private Animation anim;
 
     public Player(Texture2D spriteSheet)
     {
@@ -36,11 +38,17 @@ public class Player
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        // Andar
+        // Declarar
+        prevMouse = currMouse;
+        currMouse = Mouse.GetState();
+        bool leftClicked = currMouse.LeftButton == ButtonState.Pressed && prevMouse.LeftButton == ButtonState.Released;
+
+        MouseState m = Mouse.GetState();
         KeyboardState k = Keyboard.GetState();
+        
+        // Andar
         isMoving = false;
         float vx = 0f;
-
         float speed = (k.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed);
 
         if (k.IsKeyDown(Keys.A))
@@ -65,6 +73,12 @@ public class Player
             OnGround = false;
         }
 
+        //Attack
+        if (leftClicked && !animManager.IsPlaying(AnimationState.Attack))
+        {
+            animManager.ChangeState(AnimationState.Attack);
+            animManager.ResetCurrent(); // começa do primeiro frame do golpe
+        }
         // Gravidade
         Velocity.Y += gravity * dt;
 
@@ -74,13 +88,17 @@ public class Player
 
         // Animação
 
-        if (!OnGround)
+        if (animManager.IsPlaying(AnimationState.Attack) && !animManager.IsCurrentFinished)
         {
-            animManager.ChangeState(AnimationState.Jump);
+            // não troca de estado; deixa o Update da animação avançar os frames
         }
         else
         {
-            animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
+            // só aqui decide pulo/andar/parado
+            if (!OnGround)
+                animManager.ChangeState(AnimationState.Jump);
+            else
+                animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
         }
 
         animManager.Update(gameTime);
