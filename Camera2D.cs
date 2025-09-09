@@ -15,6 +15,11 @@ public class Camera2D
         this.viewportHeight = viewportHeight;
     }
 
+    public Vector2 ScreenToWorld(Vector2 screen)
+    {
+        return Vector2.Transform(screen, Matrix.Invert(Transform));
+    }
+
     public void Follow(Vector2 target)
     {
         position = target;

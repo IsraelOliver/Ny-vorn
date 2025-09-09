@@ -118,3 +118,4 @@ C:\Users\hhhhi\Desktop\Projeto\Ny-vorn\obj\Debug\net8.0\ref\Nyvorn.dll
 =======
 c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\MonoGame.Extended.dll
 >>>>>>> 2b1ae1c (Adicionando animação de Pulo!])
+c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\Content\player\playerAnimation0.xnb

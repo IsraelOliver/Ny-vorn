@@ -9,10 +9,12 @@ public class Game1 : Game
     //Variáveis
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D spriteSheet;
     private Texture2D tileTexture;
     private Player player;
     private Camera2D camera;
+
+    private Texture2D bodyWithArmTex;   // playerAnimation
+    private Texture2D bodyNoArmTex;     // playerAnimation0
 
     // MAPA //
     public static int tileSize = 23;
@@ -81,8 +83,10 @@ public class Game1 : Game
 
         tileTexture = Content.Load<Texture2D>("tileMap/orange");
 
-        spriteSheet = Content.Load<Texture2D>("player/playerAnimation");
-        player = new Player(spriteSheet);
+        bodyWithArmTex = Content.Load<Texture2D>("player/playerAnimation");
+        bodyNoArmTex = Content.Load<Texture2D>("player/playerAnimation0");
+
+        player = new Player(bodyWithArmTex, bodyNoArmTex, camera);
  
         // TODO: use this.Content to load your game content here
     }
