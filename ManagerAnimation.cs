@@ -21,10 +21,10 @@ public class ManagerAnimation
     {
         playerAnimations = new Dictionary<AnimationState, Animation>();
 
-        playerAnimations[AnimationState.Idle] = new Animation(spriteSheet, 23, 23, 15, 1, 0, 0.15);
-        playerAnimations[AnimationState.Jump] = new Animation(spriteSheet, 23, 23, 1, 2, 0, 0);
-        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 23, 23, 15, 0, 0, 0.03);
-        playerAnimations[AnimationState.Attack] = new Animation(spriteSheet, 23, 23, 6, 2, 1, 0.02, false);
+        playerAnimations[AnimationState.Idle] = new Animation(spriteSheet, 17, 23, 15, 1, 0, 0.15);
+        playerAnimations[AnimationState.Jump] = new Animation(spriteSheet, 17, 23, 1, 2, 0, 0);
+        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0, 0.03);
+        playerAnimations[AnimationState.Attack] = new Animation(spriteSheet, 17, 23, 6, 2, 1, 0.02, false);
 
         CurrentAnimation = playerAnimations[AnimationState.Idle];
     }

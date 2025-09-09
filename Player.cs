@@ -11,7 +11,7 @@ public class Player
     // Estado básico
     private Vector2 Position;
     private Vector2 Velocity;
-    private bool facingLeft = true;
+    private bool facingLeft = false;
     private bool isMoving = false;
     private bool OnGround = false;
 
@@ -54,13 +54,13 @@ public class Player
         {
             vx -= speed;
             isMoving = true;
-            facingLeft = true;
+            facingLeft = false;
         }
         if (k.IsKeyDown(Keys.D))
         {
             vx += speed;
             isMoving = true;
-            facingLeft = false;
+            facingLeft = true;
         }
 
         Velocity.X = vx;
