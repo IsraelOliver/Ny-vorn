@@ -8,12 +8,16 @@ namespace Nyvorn;
 
 public class Player
 {
+    public int Health { get; private set; } = 100;
+    
     private Vector2 Position, Velocity;
     private bool facingLeft = false;
     private bool isMoving = false;
     private bool OnGround = false;
 
     private MouseState prevMouse, currMouse;
+    private Vector2 mouseWorld;
+    public void SetMouseWorld(Vector2 world) => mouseWorld = world;
 
     private float walkSpeed = 120f; // velocidade da andada
     private float sprintSpeed = 200f; //velocidade da corrida
@@ -36,8 +40,13 @@ public class Player
 
     private int attackImpactStartFrame = 2;
     private int attackImpactEndFrame = 3;
+
+    private bool attackFacingLeft = false;
+ 
+    private bool attackHitActive = false;
+    private Rectangle attackHitRect;
     
-    private bool drawAttackHitbox = false;   // troque pra true quando quiser ver a caixa
+    private bool drawAttackHitbox = true;   // troque pra true quando quiser ver a caixa
 
     public Player(Texture2D bodyWithArm, Texture2D bodyOffHand, Texture2D attackSheet)
     {
@@ -64,8 +73,8 @@ public class Player
         float speed = k.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed;
         float vx = 0f;
 
-        if (k.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; facingLeft = true; }
-        if (k.IsKeyDown(Keys.D)) { vx += speed; isMoving = true; facingLeft = false; }
+        if (k.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; if (!attacking) facingLeft = true; }
+        if (k.IsKeyDown(Keys.D)) { vx += speed; isMoving = true; if (!attacking) facingLeft = false; }
 
         Velocity.X = vx;
 
@@ -79,6 +88,9 @@ public class Player
         // ATAQUE (inicia)
         if (leftClicked && !attacking)
         {
+            float playerCenterX = Position.X + animManager.FrameWidth * 0.5f;
+            attackFacingLeft = mouseWorld.X < playerCenterX; // trava direção do swing
+
             attacking = true;
             attackTimer = attackDuration;
             attackOverlay.Reset();                    // começa no frame 0:contentReference[oaicite:6]{index=6}
@@ -102,18 +114,19 @@ public class Player
         if (attacking)
         {
             attackOverlay.Update(gameTime);           // anima o braço:contentReference[oaicite:8]{index=8}
-            
-            bool canHit = false;
-            int f = attackOverlay.CurrentFrame; // precisa do getter em Animation
-            canHit = (f >= attackImpactStartFrame && f <= attackImpactEndFrame);
+
+            int f = attackOverlay.CurrentFrame;
+            bool canHit = (f >= attackImpactStartFrame && f <= attackImpactEndFrame);
 
             if (canHit)
             {
-                Rectangle hit = GetAttackHitbox();
-
-                // TODO: colisão com inimigos
-                // foreach (var enemy in enemies)
-                //     if (hit.Intersects(enemy.Bounds)) enemy.TakeDamage(dano);
+                attackHitActive = true;
+                attackHitRect   = GetAttackHitbox();
+            }
+            else
+            {
+                attackHitActive = false;
+                attackHitRect   = Rectangle.Empty; // <-- limpa
             }
 
             attackTimer -= dt;
@@ -126,25 +139,32 @@ public class Player
             }
         }
     }
+
+    public Rectangle GetBounds() =>
+    new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
+
+    public void TakeDamage(int amount, int fromDir = 0)
+    {
+        Health = Math.Max(0, Health - amount);
+        if (fromDir != 0)
+            Velocity.X = 140f * -Math.Sign(fromDir);
+    }
+    
+    public bool TryGetAttackHitbox(out Rectangle rect)
+    {
+        rect = attackHitRect;
+        return attackHitActive;
+    }
     
     private Rectangle GetAttackHitbox()
     {
-        // AABB atual do corpo (17x23), do jeitinho que seu MoveAxis usa:contentReference[oaicite:3]{index=3}
-        Rectangle body = new Rectangle(
-            (int)Position.X,
-            (int)Position.Y,
-            animManager.FrameWidth,   // 17
-            animManager.FrameHeight   // 23
-        );
+        Rectangle body = new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
 
-        // Direção: olhando pra esquerda => bate à esquerda, caso contrário à direita
-        int dir = facingLeft ? -1 : 1;
+        // use a direção travada do swing
+        int dir = attackFacingLeft ? -1 : 1;
 
-        int x = (dir > 0)
-            ? body.Right                // começa na borda direita
-            : body.Left - attackReachForward; // começa 11 px antes da borda esquerda
-
-        int y = body.Y + attackYOffset;       // altura dentro do corpo
+        int x = (dir > 0) ? body.Right : body.Left - attackReachForward;
+        int y = body.Y + attackYOffset;
 
         return new Rectangle(x, y, attackReachForward, attackHeight);
     }
@@ -203,13 +223,14 @@ public class Player
 
         if (attacking)
         {
+            // o overlay segue a direção travada do swing
+            SpriteEffects attackFx = attackFacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
             Vector2 offs = attackOffsetByState[animManager.CurrentState];
-
             int baseW = animManager.FrameWidth;
             int overlayW = attackOverlay.FrameWidth;
 
-            if (fx == SpriteEffects.FlipHorizontally)
+            if (attackFx == SpriteEffects.FlipHorizontally)
             {
                 float flipCompX = baseW - overlayW;
                 offs.X = -offs.X + flipCompX;
@@ -220,18 +241,33 @@ public class Player
                 Position + offs,
                 attackOverlay.SourceRect,
                 Color.White,
-                0f,
-                Vector2.Zero,
-                1f,
-                fx,
-                0f
+                0f, Vector2.Zero, 1f,
+                attackFx, 0f
             );
+        }
+
+        // no Draw, quando attacking:
+        if (attacking && drawAttackHitbox && attackHitActive)
+        {
+            spriteBatch.Draw(Game1.WhitePixel, attackHitRect, new Color(0,255,0,90));
         }
 
         if (attacking && drawAttackHitbox)
         {
             Rectangle hit = GetAttackHitbox();
+            spriteBatch.Draw(Game1.WhitePixel, hit, new Color(0, 255, 0, 90));
         }
+
+        int barW = 20, barH = 4;
+        var r = new Rectangle((int)Position.X - 1, (int)Position.Y - 6, barW, barH);
+        float pct = Health / 100f;
+
+        // fundo
+        spriteBatch.Draw(Game1.WhitePixel, r, new Color(30,30,30,180));
+        // preenchimento
+        int w = (int)(r.Width * MathHelper.Clamp(pct, 0f, 1f));
+        if (w > 0)
+            spriteBatch.Draw(Game1.WhitePixel, new Rectangle(r.X, r.Y, w, r.Height), Color.LimeGreen);
     }
     public Vector2 GetPosition() => Position;
 }
