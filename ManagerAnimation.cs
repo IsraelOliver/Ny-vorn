@@ -6,46 +6,63 @@ namespace Nyvorn;
 
 public class ManagerAnimation
 {
-    private Dictionary<AnimationState, Animation> playerAnimations;
+    private Dictionary<AnimationState, Animation> bodyWithArm;
+    private Dictionary<AnimationState, Animation> bodyOffHand;
 
-    public AnimationState CurrentState { get; private set; } = AnimationState.Idle;  // estado corrente
-    public bool IsCurrentFinished => CurrentAnimation.IsFinished;                     // terminou?
-    public void ResetCurrent() => CurrentAnimation.Reset();                           // recomeça do 1º frame
-    public bool IsPlaying(AnimationState s) => CurrentState == s;                     // helper
+    private Dictionary<AnimationState, Animation> activeSet;
 
+    public AnimationState CurrentState { get; private set; } = AnimationState.Idle;
     public Animation CurrentAnimation { get; private set; }
+    public bool IsCurrentFinished => CurrentAnimation.IsFinished;
     public int FrameWidth => CurrentAnimation.FrameWidth;
     public int FrameHeight => CurrentAnimation.FrameHeight;
 
-    public ManagerAnimation(Texture2D spriteSheet)
+    public ManagerAnimation(Texture2D sheetWithArm, Texture2D sheetOffHand)
     {
-        playerAnimations = new Dictionary<AnimationState, Animation>();
+        bodyWithArm = new()
+        {
+            [AnimationState.Idle]    = new Animation(sheetWithArm, 17, 23, 15, 1, 0, 0.15),
+            [AnimationState.Walking] = new Animation(sheetWithArm, 17, 23, 15, 0, 0, 0.03),
+            [AnimationState.Jump]    = new Animation(sheetWithArm, 17, 23, 1,  2, 0, 0.00)
+        };
 
-        playerAnimations[AnimationState.Idle] = new Animation(spriteSheet, 17, 23, 15, 1, 0, 0.15);
-        playerAnimations[AnimationState.Jump] = new Animation(spriteSheet, 17, 23, 1, 2, 0, 0);
-        playerAnimations[AnimationState.Walking] = new Animation(spriteSheet, 17, 23, 15, 0, 0, 0.03);
-        playerAnimations[AnimationState.Attack] = new Animation(spriteSheet, 17, 23, 1, 2, 1, 0.02, false);
+        bodyOffHand = new()
+        {
+            [AnimationState.Idle]    = new Animation(sheetOffHand, 17, 23, 15, 1, 0, 0.15),
+            [AnimationState.Walking] = new Animation(sheetOffHand, 17, 23, 15, 0, 0, 0.03),
+            [AnimationState.Jump]    = new Animation(sheetOffHand, 17, 23, 1,  2, 0, 0.00)
+        };
 
-        CurrentAnimation = playerAnimations[AnimationState.Idle];
+        activeSet = bodyWithArm;                  // começa com braço normal
+        CurrentAnimation = activeSet[AnimationState.Idle];
     }
 
-    //Trocar o estado da animação
-    public void ChangeState(AnimationState newState)
+    public void UseOffHandBase(bool useOffHand)
     {
-        if (CurrentAnimation != playerAnimations[newState])
+        var newSet = useOffHand ? bodyOffHand : bodyWithArm;
+        if (ReferenceEquals(activeSet, newSet)) return;
+
+        activeSet = newSet;
+        // garante que mantém o mesmo estado visual
+        CurrentAnimation = activeSet[CurrentState];
+        CurrentAnimation.Reset();
+    }
+
+    public void ChangeState(AnimationState s)
+    {
+        if (CurrentAnimation != activeSet[s])
         {
-            CurrentAnimation = playerAnimations[newState];
-            CurrentState = newState; // <-- registra o enum atual
+            CurrentAnimation = activeSet[s];
+            CurrentState = s;                              // você já fazia isso:contentReference[oaicite:2]{index=2}
         }
     }
 
-    public void Update(GameTime gameTime)
-    {
-        CurrentAnimation.Update(gameTime);
-    }
+    public void ResetCurrent() => CurrentAnimation.Reset();
 
-    public void Draw(SpriteBatch spriteBatch, Vector2 position, SpriteEffects spriteEffect)
-    {
-        CurrentAnimation.Draw(spriteBatch, position, spriteEffect);
-    }
+    public bool IsPlaying(AnimationState s) => CurrentState == s;
+
+    public void Update(GameTime gt) => CurrentAnimation.Update(gt); // já existia:contentReference[oaicite:3]{index=3}
+
+    public void Draw(SpriteBatch sb, Vector2 pos, SpriteEffects fx)
+        => CurrentAnimation.Draw(sb, pos, fx);
 }

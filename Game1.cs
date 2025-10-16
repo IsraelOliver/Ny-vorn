@@ -13,9 +13,6 @@ public class Game1 : Game
     private Player player;
     private Camera2D camera;
 
-    private Texture2D bodyWithArmTex;   // playerAnimation
-    private Texture2D bodyNoArmTex;     // playerAnimation0
-
     // MAPA //
     public static int tileSize = 23;
 
@@ -83,10 +80,11 @@ public class Game1 : Game
 
         tileTexture = Content.Load<Texture2D>("tileMap/orange");
 
-        bodyWithArmTex = Content.Load<Texture2D>("player/playerAnimation");
-        bodyNoArmTex = Content.Load<Texture2D>("player/playerAnimation0");
+        var bodyWithArm  = Content.Load<Texture2D>("player/playerAnimation");
+        var bodyOffHand  = Content.Load<Texture2D>("player/playerAnimationOffHand");
+        var attackSheet  = Content.Load<Texture2D>("player/playerAttack");
 
-        player = new Player(bodyWithArmTex, bodyNoArmTex, camera);
+        player = new Player(bodyWithArm, bodyOffHand, attackSheet);
  
         // TODO: use this.Content to load your game content here
     }

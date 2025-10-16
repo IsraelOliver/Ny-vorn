@@ -20,6 +20,9 @@ public class Animation
     private int currentFrame = 0;
     private Rectangle sourceRect;
 
+    public int CurrentFrame => currentFrame;
+    public Rectangle SourceRect => sourceRect;
+
     //Contrutor da classe Animation
     public Animation(Texture2D texture, int frameWidth, int frameHeight, int totalFrame, int row, int startColumn, double timePerFrame, bool loop = true)
     {
