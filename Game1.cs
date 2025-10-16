@@ -12,6 +12,7 @@ public class Game1 : Game
     private Texture2D tileTexture;
     private Player player;
     private Camera2D camera;
+    public static Texture2D WhitePixel;
 
     // MAPA //
     public static int tileSize = 23;
@@ -79,6 +80,9 @@ public class Game1 : Game
         camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
         tileTexture = Content.Load<Texture2D>("tileMap/orange");
+        
+        WhitePixel = new Texture2D(GraphicsDevice, 1, 1);
+        WhitePixel.SetData(new[] { Color.White });
 
         var bodyWithArm  = Content.Load<Texture2D>("player/playerAnimation");
         var bodyOffHand  = Content.Load<Texture2D>("player/playerAnimationOffHand");

@@ -33,7 +33,7 @@ public class ManagerAnimation
             [AnimationState.Jump]    = new Animation(sheetOffHand, 17, 23, 1,  2, 0, 0.00)
         };
 
-        activeSet = bodyWithArm;                  // começa com braço normal
+        activeSet = bodyWithArm;
         CurrentAnimation = activeSet[AnimationState.Idle];
     }
 
@@ -42,10 +42,19 @@ public class ManagerAnimation
         var newSet = useOffHand ? bodyOffHand : bodyWithArm;
         if (ReferenceEquals(activeSet, newSet)) return;
 
+        // Guarda a animação/estado atuais para copiar o progresso
+        var oldAnim = CurrentAnimation;
+        var oldState = CurrentState;
+
         activeSet = newSet;
-        // garante que mantém o mesmo estado visual
-        CurrentAnimation = activeSet[CurrentState];
-        CurrentAnimation.Reset();
+
+        var newAnim = activeSet[oldState];
+        if (!ReferenceEquals(newAnim, oldAnim))
+        {
+            // Copia o progresso (frame/timer) para a nova folha
+            newAnim.CopyProgressFrom(oldAnim);
+            CurrentAnimation = newAnim;
+        }
     }
 
     public void ChangeState(AnimationState s)
@@ -53,7 +62,7 @@ public class ManagerAnimation
         if (CurrentAnimation != activeSet[s])
         {
             CurrentAnimation = activeSet[s];
-            CurrentState = s;                              // você já fazia isso:contentReference[oaicite:2]{index=2}
+            CurrentState = s;
         }
     }
 
@@ -61,7 +70,7 @@ public class ManagerAnimation
 
     public bool IsPlaying(AnimationState s) => CurrentState == s;
 
-    public void Update(GameTime gt) => CurrentAnimation.Update(gt); // já existia:contentReference[oaicite:3]{index=3}
+    public void Update(GameTime gt) => CurrentAnimation.Update(gt);
 
     public void Draw(SpriteBatch sb, Vector2 pos, SpriteEffects fx)
         => CurrentAnimation.Draw(sb, pos, fx);

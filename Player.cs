@@ -15,27 +15,36 @@ public class Player
 
     private MouseState prevMouse, currMouse;
 
-    private float walkSpeed = 120f;
-    private float sprintSpeed = 200f;
-    private float gravity = 1800f;
-    private float jumpSpeed = 500f;
+    private float walkSpeed = 120f; // velocidade da andada
+    private float sprintSpeed = 200f; //velocidade da corrida
+    private float gravity = 1800f; // força da gravidade
+    private float jumpSpeed = 500f; // força do pulo
     private const float Skin = 1f;
 
     private ManagerAnimation animManager;
 
-    // === ATAQUE (overlay) ===
-    private Animation attackOverlay;      // só o braço de trás (23x23)
+    // ataque com overlay
+    private Animation attackOverlay; //animação do braço
     private bool attacking = false;
     private float attackTimer = 0f;
-    private float attackDuration = 0.22f; // ajuste ao timing da folha
+    private float attackDuration = 0.22f; // velocidade do ataque
+
+    // ataque hitbox
+    private int attackReachForward = 11;  // alcance pra frente (px) — você mediu 11
+    private int attackHeight = 10;        // “espessura” vertical do golpe (ajuste fino)
+    private int attackYOffset = 6;        // deslocamento vertical dentro do corpo (0 = topo)
+
+    private int attackImpactStartFrame = 2;
+    private int attackImpactEndFrame = 3;
+    
+    private bool drawAttackHitbox = false;   // troque pra true quando quiser ver a caixa
 
     public Player(Texture2D bodyWithArm, Texture2D bodyOffHand, Texture2D attackSheet)
     {
         animManager = new ManagerAnimation(bodyWithArm, bodyOffHand);
         Position = new Vector2(100, 100);
 
-        // linha 0, col 0, N frames conforme tua folha playerAttack (23x23)
-        int frames = 4; // <-- ajuste conforme sua imagem
+        int frames = 4;
         attackOverlay = new Animation(attackSheet, 23, 23, frames, 0, 0, 0.03, loop: false);
     }
 
@@ -55,7 +64,7 @@ public class Player
         float speed = k.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed;
         float vx = 0f;
 
-        if (k.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; facingLeft = true;  }
+        if (k.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; facingLeft = true; }
         if (k.IsKeyDown(Keys.D)) { vx += speed; isMoving = true; facingLeft = false; }
 
         Velocity.X = vx;
@@ -85,7 +94,7 @@ public class Player
 
         // ESTADOS do corpo (não troca pra Attack)
         if (!OnGround) animManager.ChangeState(AnimationState.Jump);
-        else           animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
+        else animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
 
         // Update das animações
         animManager.Update(gameTime);
@@ -93,6 +102,20 @@ public class Player
         if (attacking)
         {
             attackOverlay.Update(gameTime);           // anima o braço:contentReference[oaicite:8]{index=8}
+            
+            bool canHit = false;
+            int f = attackOverlay.CurrentFrame; // precisa do getter em Animation
+            canHit = (f >= attackImpactStartFrame && f <= attackImpactEndFrame);
+
+            if (canHit)
+            {
+                Rectangle hit = GetAttackHitbox();
+
+                // TODO: colisão com inimigos
+                // foreach (var enemy in enemies)
+                //     if (hit.Intersects(enemy.Bounds)) enemy.TakeDamage(dano);
+            }
+
             attackTimer -= dt;
 
             // terminou por tempo OU a overlay chegou no fim (sem loop)
@@ -102,6 +125,28 @@ public class Player
                 animManager.UseOffHandBase(false);    // volta base COM braço
             }
         }
+    }
+    
+    private Rectangle GetAttackHitbox()
+    {
+        // AABB atual do corpo (17x23), do jeitinho que seu MoveAxis usa:contentReference[oaicite:3]{index=3}
+        Rectangle body = new Rectangle(
+            (int)Position.X,
+            (int)Position.Y,
+            animManager.FrameWidth,   // 17
+            animManager.FrameHeight   // 23
+        );
+
+        // Direção: olhando pra esquerda => bate à esquerda, caso contrário à direita
+        int dir = facingLeft ? -1 : 1;
+
+        int x = (dir > 0)
+            ? body.Right                // começa na borda direita
+            : body.Left - attackReachForward; // começa 11 px antes da borda esquerda
+
+        int y = body.Y + attackYOffset;       // altura dentro do corpo
+
+        return new Rectangle(x, y, attackReachForward, attackHeight);
     }
 
     private void MoveAxis(float dx, float dy)
@@ -145,7 +190,7 @@ public class Player
     
     private readonly Dictionary<AnimationState, Vector2> attackOffsetByState = new()
     {
-        { AnimationState.Idle,    new Vector2( 0f, 0f ) },  // chute inicial — ajuste olhando na tela
+        { AnimationState.Idle,    new Vector2( 0f, 0f ) },
         { AnimationState.Walking, new Vector2( 0f, 0f ) },
         { AnimationState.Jump,    new Vector2( 0f, 0f ) },
     };
@@ -154,17 +199,21 @@ public class Player
     {
         SpriteEffects fx = facingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
-        // 1) corpo base (já está alinhado certinho)
-        animManager.Draw(spriteBatch, Position, fx); // usa 17x23 pro AABB:contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
+        animManager.Draw(spriteBatch, Position, fx);
 
-        // 2) overlay do ataque (só ajustar posição)
         if (attacking)
         {
+
             Vector2 offs = attackOffsetByState[animManager.CurrentState];
 
-            // se flipar, espelha apenas o X do offset
+            int baseW = animManager.FrameWidth;
+            int overlayW = attackOverlay.FrameWidth;
+
             if (fx == SpriteEffects.FlipHorizontally)
-                offs.X = -offs.X;
+            {
+                float flipCompX = baseW - overlayW;
+                offs.X = -offs.X + flipCompX;
+            }
 
             spriteBatch.Draw(
                 attackOverlay.Texture,
@@ -177,6 +226,11 @@ public class Player
                 fx,
                 0f
             );
+        }
+
+        if (attacking && drawAttackHitbox)
+        {
+            Rectangle hit = GetAttackHitbox();
         }
     }
     public Vector2 GetPosition() => Position;

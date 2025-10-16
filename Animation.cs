@@ -23,7 +23,6 @@ public class Animation
     public int CurrentFrame => currentFrame;
     public Rectangle SourceRect => sourceRect;
 
-    //Contrutor da classe Animation
     public Animation(Texture2D texture, int frameWidth, int frameHeight, int totalFrame, int row, int startColumn, double timePerFrame, bool loop = true)
     {
         Texture = texture;
@@ -31,7 +30,7 @@ public class Animation
         FrameHeight = frameHeight;
         TotalFrame = totalFrame;
         Row = row;
-        StartColumn = startColumn;   // <<< usa offset
+        StartColumn = startColumn;
         TimePerFrame = timePerFrame;
         Loop = loop;
 
@@ -39,7 +38,7 @@ public class Animation
     }
     public void Update(GameTime gameTime)
     {
-        if (IsFinished) return; // se não loopa e já acabou
+        if (IsFinished) return;
 
         timer += gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -56,13 +55,13 @@ public class Animation
                 }
                 else
                 {
-                    currentFrame = TotalFrame - 1; // trava no último frame
+                    currentFrame = TotalFrame - 1;
                     IsFinished = true;
                 }
             }
         }
 
-        int column = StartColumn + currentFrame; // <<< aplica offset
+        int column = StartColumn + currentFrame;
         sourceRect = new Rectangle(column * FrameWidth, Row * FrameHeight, FrameWidth, FrameHeight);
     }
 
@@ -73,10 +72,50 @@ public class Animation
         IsFinished = false;
     }
 
+    public void CopyProgressFrom(Animation other)
+    {
+        if (other == null) return;
+
+        // Mapeia por fração do ciclo para suportar TotalFrame diferentes
+        double frac = (other.TotalFrame > 0)
+            ? (double)other.CurrentFrame / other.TotalFrame
+            : 0.0;
+
+        int mappedFrame = (int)System.Math.Round(frac * this.TotalFrame);
+        mappedFrame = System.Math.Clamp(mappedFrame, 0, System.Math.Max(0, this.TotalFrame - 1));
+
+        this.IsFinished = false;         // ao trocar folha, consideramos não-finalizada
+        this.timer = 0;                  // mantém passo regular entre frames
+        // se preferir preservar sensação de tempo, pode copiar uma fração de timer aqui
+        this.Reset();                    // garante sourceRect coerente com frame 0
+        // depois ajusta para o frame mapeado:
+        for (int i = 0; i < mappedFrame; i++)
+        {
+            // avança o frame sem esperar tempo (salta para o frame desejado)
+            // reaproveitando a lógica do Update:
+            // incrementa currentFrame respeitando loop/finish
+            if (i + 1 >= this.TotalFrame)
+            {
+                if (this.Loop) { /* volta ao início */ }
+                else { this.IsFinished = true; break; }
+            }
+        }
+        // Ajuste direto do frame (mais simples e determinístico):
+        // Como currentFrame é privado, usamos um pequeno truque:
+        // avançamos o sourceRect manualmente com base no mappedFrame:
+        // -> substitui o loop acima por:
+        typeof(Animation).GetField("currentFrame", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.SetValue(this, mappedFrame);
+        int column = this.StartColumn + mappedFrame;
+        typeof(Animation).GetField("sourceRect", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.SetValue(this, new Microsoft.Xna.Framework.Rectangle(column * this.FrameWidth, this.Row * this.FrameHeight, this.FrameWidth, this.FrameHeight));
+    }
+
     public void Draw(SpriteBatch spriteBatch, Vector2 Position, SpriteEffects effects)
     {
         Rectangle destinationRect = new Rectangle((int)Position.X, (int)Position.Y, FrameWidth, FrameHeight);
         spriteBatch.Draw(Texture, destinationRect, sourceRect, Color.White, 0f, Vector2.Zero, effects, 0f);
+        
     }
 
 }
