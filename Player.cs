@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Nyvorn;
 
-public class Player
+public partial class Player : IDamageable
 {
     public int Health { get; private set; } = 100; // Vida do player.
     
@@ -25,6 +25,15 @@ public class Player
     private float jumpSpeed = 500f; // força do pulo
     private const float Skin = 1f;
 
+    // ===== Jump Responsivo =====
+    private const float CoyoteTime     = 0.12f;  // tempo extra depois de sair da borda
+    private const float JumpBufferTime = 0.12f;  // tempo para "guardar" o pulo antes de tocar no chão
+    private float coyoteTimer = 0f;
+    private float jumpBufferTimer = 0f;
+
+    // Para detectar "apertou agora"
+    private KeyboardState prevKey, currKey;
+
     private ManagerAnimation animManager;
 
     // ataque com overlay
@@ -34,7 +43,7 @@ public class Player
     private float attackDuration = 0.22f; // velocidade do ataque
 
     // ataque hitbox
-    private int attackReachForward = 8;  // alcance do ataque (hitbox do ataque)
+    private int attackReachForward = 10;  // alcance do ataque (hitbox do ataque)
     private int attackHeight = 12;        // tamanho do arco do golpe (aumenta para baixo, ajustar junto com a altura)
     private int attackYOffset = 1;        // altura do ataque (começa de cima)
 
@@ -46,7 +55,7 @@ public class Player
     private bool attackHitActive = false;
     private Rectangle attackHitRect;
 
-    private bool drawAttackHitbox = true;   // troque pra true quando quiser ver a caixa
+    private bool drawAttackHitbox = false;   // troque pra true quando quiser ver a caixa
     
     private const float HurtStunTime   = 0.18f;
     private const float HurtKbSpeed    = 220f;
@@ -71,20 +80,21 @@ public class Player
         bool leftClicked = currMouse.LeftButton == ButtonState.Pressed
                         && prevMouse.LeftButton == ButtonState.Released;
 
-        var k = Keyboard.GetState();
+        prevKey = currKey;
+        currKey = Keyboard.GetState();
 
         bool inHurt = hurtTimer > 0f;
         if (inHurt) hurtTimer -= dt;
 
         // Faz andar
         isMoving = false;
-        float speed = k.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed;
+        float speed = currKey.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed;
         float vx = 0f;
 
         if(!inHurt)
         {
-            if (k.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; if (!attacking) facingLeft = true; }
-            if (k.IsKeyDown(Keys.D)) { vx += speed; isMoving = true; if (!attacking) facingLeft = false; }
+            if (currKey.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; if (!attacking) facingLeft = true; }
+            if (currKey.IsKeyDown(Keys.D)) { vx += speed; isMoving = true; if (!attacking) facingLeft = false; }
         }
         
         if(!inHurt) Velocity.X = vx;
@@ -99,10 +109,28 @@ public class Player
         }
 
         // Faz pular
-        if (!inHurt && k.IsKeyDown(Keys.Space) && OnGround)
+        // ===== Coyote Time + Jump Buffer =====
+        // Buffera quando APERTA o espaço
+        bool jumpPressedThisFrame = currKey.IsKeyDown(Keys.Space) && prevKey.IsKeyUp(Keys.Space);
+        if (jumpPressedThisFrame)
+            jumpBufferTimer = JumpBufferTime;
+
+        // Atualiza coyote
+        if (OnGround) coyoteTimer = CoyoteTime;
+        else          coyoteTimer -= dt;
+
+        if (jumpBufferTimer > 0f) jumpBufferTimer -= dt;
+
+        // Consome o pulo se puder (estiver no chão ou ainda dentro do coyote)
+        bool canJump = (OnGround || coyoteTimer > 0f);
+        if (!inHurt && canJump && jumpBufferTimer > 0f)
         {
             Velocity.Y = -jumpSpeed;
             OnGround = false;
+
+            // limpa timers para não duplicar o pulo
+            jumpBufferTimer = 0f;
+            coyoteTimer = 0f;
         }
 
         // Faz atacar
@@ -165,21 +193,6 @@ public class Player
 
     public Rectangle GetBounds() =>
     new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
-
-    // Dano e knockBack no player
-    public void TakeDamage(int amount, int fromDir = 0)
-    {
-        Health = Math.Max(0, Health - amount);
-
-        hurtTimer = HurtStunTime;
-
-        if (fromDir != 0) // fromDir > 0 significa "player está à direita do inimigo" => empurra para a direita
-        {
-            Velocity.X = HurtKbSpeed * Math.Sign(fromDir);
-            Velocity.Y = -HurtKbUp;
-        }
-    }
-    
     public bool TryGetAttackHitbox(out Rectangle rect)
     {
         rect = attackHitRect;
@@ -300,4 +313,24 @@ public class Player
             spriteBatch.Draw(Game1.WhitePixel, new Rectangle(r.X, r.Y, w, r.Height), Color.LimeGreen);
     }
     public Vector2 GetPosition() => Position;
+
+    public bool IsAlive => Health > 0;
+    public Rectangle Bounds => GetBounds();
+    Vector2 IDamageable.Position => Position;
+
+    public void TakeDamage(int amount, int fromDir = 0)
+    => ApplyHit(new HitInfo(amount, fromDir, HurtKbSpeed, HurtKbUp, HurtStunTime, Faction.Enemy, "Legacy"));
+
+    public void ApplyHit(in HitInfo hit)
+    {
+        Health = Math.Max(0, Health - hit.Damage);
+
+        hurtTimer = hit.Stun; // reaproveita seu HurtStunTime se preferir
+
+        if (hit.DirX != 0)
+        {
+            Velocity.X = hit.KnockbackX * Math.Sign(hit.DirX);
+            Velocity.Y = -hit.KnockbackY;
+        }
+    }
 }

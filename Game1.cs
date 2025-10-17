@@ -17,6 +17,9 @@ public class Game1 : Game
 
     public static int ViewW, ViewH;
 
+    public DamageChannel damage = new DamageChannel();
+    public DamageChannel DamageBus => damage;
+
     private Texture2D enemySheet;
     private System.Collections.Generic.List<Enemy> enemies = new();
 
@@ -54,8 +57,9 @@ public class Game1 : Game
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
     };
-    
+
     //Metodo para verificar se um tile é solido
+
     public static bool IsSolid(int tileX, int tileY)
     {
         // Evita erro por acesso fora da matriz
@@ -131,15 +135,27 @@ public class Game1 : Game
                 if (!e.IsDead && atk.Intersects(e.Bounds))
                 {
                     int dir = Math.Sign(e.Position.X - player.GetPosition().X);
-                    e.TakeDamage(20, dir);
+
+                    var hit = new HitInfo(
+                        dmg: 20, dirX: dir,
+                        kbX: 200f, kbY: 80f,   // ajuste fino
+                        stun: 0.10f,
+                        src: Faction.Player,
+                        tag: "Slash"
+                    );
+                    damage.Enqueue(e, in hit);
+
+                    // (aqui também é o hook perfeito p/ hitstop/shake se quiser)
                 }
             }
         }
 
         foreach (var e in enemies)
-            e.Update(gameTime, player);
+            e.Update(gameTime, player, this);
 
         enemies.RemoveAll(e => e.IsDead);
+
+        damage.DispatchAll();
 
         camera.Follow(player.GetPosition());
 

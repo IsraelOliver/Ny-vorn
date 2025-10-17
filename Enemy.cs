@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Nyvorn;
 
-public class Enemy
+public partial class Enemy : IDamageable
 {
     // ===== Data & estado =====
     public Vector2 Position;
@@ -14,6 +14,8 @@ public class Enemy
 
     public int Health { get; private set; } = 100;
     public bool IsDead => Health <= 0;
+
+    Vector2 IDamageable.Position => Position;
 
     // ===== Tunáveis =====
     private const float Gravity = 1800f;
@@ -105,7 +107,7 @@ public class Enemy
         current = walk;
     }
 
-    public void Update(GameTime gt, Player player)
+    public void Update(GameTime gt, Player player, Game1 game)
     {
         float dt = (float)gt.ElapsedGameTime.TotalSeconds;
         if (IsDead) return;
@@ -216,7 +218,11 @@ public class Enemy
         // ===== dano por contato no player =====
         if (contactTimer <= 0f && this.Bounds.Intersects(player.GetBounds()))
         {
-            player.TakeDamage(25, Math.Sign(toPlayer.X)); // 25 conforme pedido
+            int dir = Math.Sign((player.GetPosition() - Position).X);
+            var hit = new HitInfo(25, dir, kbX: 220f, kbY: 120f, stun: 0.18f, src: Faction.Enemy, tag: "Contact");
+
+            // publicar no canal que está no Game1
+            game.DamageBus.Enqueue(player, in hit); // ver Passo 6 p/ expor o bus
             contactTimer = ContactCooldown;
         }
     }
@@ -283,13 +289,34 @@ public class Enemy
         var fx = facingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
         current.Draw(sb, Position, fx);
 
-            if (!IsDead)
-            {
-                int barW = 18, barH = 4;
-                var r = new Rectangle((int)Position.X - 1, (int)Position.Y - 6, barW, barH);
-                float pct = Health / 100f;
-                // usa a função do Game1
-                Game1_UnsafeDrawBar(sb, r, pct);
-            }
+        if (!IsDead)
+        {
+            int barW = 18, barH = 4;
+            var r = new Rectangle((int)Position.X - 1, (int)Position.Y - 6, barW, barH);
+            float pct = Health / 100f;
+            // usa a função do Game1
+            Game1_UnsafeDrawBar(sb, r, pct);
+        }
+    }
+    
+    public bool IsAlive => !IsDead;
+
+    public void ApplyHit(in HitInfo hit)
+    {
+        if (IsDead || hurtTimer > 0f) return;
+
+        Health -= hit.Damage;
+        hurtTimer = HurtIframes;
+
+        // knockback
+        if (hit.DirX != 0)
+        {
+            Velocity.X = hit.KnockbackX * -MathF.Sign(hit.DirX);
+            Velocity.Y = -hit.KnockbackY;
+            knockbackTimer = KnockbackTime;
+        }
+
+        // opcional: usar hit.Stun para "parar IA" por um tempinho
+        // opcional: tocar SFX/partículas via callback/evento
     }
 }
