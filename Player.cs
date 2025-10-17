@@ -8,19 +8,19 @@ namespace Nyvorn;
 
 public class Player
 {
-    public int Health { get; private set; } = 100;
+    public int Health { get; private set; } = 100; // Vida do player.
     
     private Vector2 Position, Velocity;
-    private bool facingLeft = false;
-    private bool isMoving = false;
-    private bool OnGround = false;
+    private bool facingLeft = false; // sensor para verificar o lado do player.
+    private bool isMoving = false; // sensor de movimento.
+    private bool OnGround = false; // sensor para ver se esta no chão.
 
     private MouseState prevMouse, currMouse;
     private Vector2 mouseWorld;
     public void SetMouseWorld(Vector2 world) => mouseWorld = world;
 
     private float walkSpeed = 120f; // velocidade da andada
-    private float sprintSpeed = 200f; //velocidade da corrida
+    private float sprintSpeed = 200f; // velocidade da corrida
     private float gravity = 1800f; // força da gravidade
     private float jumpSpeed = 500f; // força do pulo
     private const float Skin = 1f;
@@ -34,9 +34,9 @@ public class Player
     private float attackDuration = 0.22f; // velocidade do ataque
 
     // ataque hitbox
-    private int attackReachForward = 11;  // alcance pra frente (px) — você mediu 11
-    private int attackHeight = 10;        // “espessura” vertical do golpe (ajuste fino)
-    private int attackYOffset = 6;        // deslocamento vertical dentro do corpo (0 = topo)
+    private int attackReachForward = 8;  // alcance do ataque (hitbox do ataque)
+    private int attackHeight = 12;        // tamanho do arco do golpe (aumenta para baixo, ajustar junto com a altura)
+    private int attackYOffset = 1;        // altura do ataque (começa de cima)
 
     private int attackImpactStartFrame = 2;
     private int attackImpactEndFrame = 3;
@@ -45,8 +45,13 @@ public class Player
  
     private bool attackHitActive = false;
     private Rectangle attackHitRect;
-    
+
     private bool drawAttackHitbox = true;   // troque pra true quando quiser ver a caixa
+    
+    private const float HurtStunTime   = 0.18f;
+    private const float HurtKbSpeed    = 220f;
+    private const float HurtKbUp       = 120f;
+    private float hurtTimer = 0f;
 
     public Player(Texture2D bodyWithArm, Texture2D bodyOffHand, Texture2D attackSheet)
     {
@@ -68,44 +73,59 @@ public class Player
 
         var k = Keyboard.GetState();
 
-        // ANDAR
+        bool inHurt = hurtTimer > 0f;
+        if (inHurt) hurtTimer -= dt;
+
+        // Faz andar
         isMoving = false;
         float speed = k.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed;
         float vx = 0f;
 
-        if (k.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; if (!attacking) facingLeft = true; }
-        if (k.IsKeyDown(Keys.D)) { vx += speed; isMoving = true; if (!attacking) facingLeft = false; }
+        if(!inHurt)
+        {
+            if (k.IsKeyDown(Keys.A)) { vx -= speed; isMoving = true; if (!attacking) facingLeft = true; }
+            if (k.IsKeyDown(Keys.D)) { vx += speed; isMoving = true; if (!attacking) facingLeft = false; }
+        }
+        
+        if(!inHurt) Velocity.X = vx;
+        {
+            // opcional: amortecer um pouco o knockback sem matar o impulso de cara
+            /*
+            float sign = MathF.Sign(Velocity.X);
+            float decel = 1800f * dt;
+            if (MathF.Abs(Velocity.X) <= decel) Velocity.X = 0f;
+            else Velocity.X -= decel * sign;
+            */
+        }
 
-        Velocity.X = vx;
-
-        // PULO
-        if (k.IsKeyDown(Keys.Space) && OnGround)
+        // Faz pular
+        if (!inHurt && k.IsKeyDown(Keys.Space) && OnGround)
         {
             Velocity.Y = -jumpSpeed;
             OnGround = false;
         }
 
-        // ATAQUE (inicia)
+        // Faz atacar
         if (leftClicked && !attacking)
         {
             float playerCenterX = Position.X + animManager.FrameWidth * 0.5f;
-            attackFacingLeft = mouseWorld.X < playerCenterX; // trava direção do swing
+            attackFacingLeft = mouseWorld.X < playerCenterX; // faz atacar semrpe para o mesmo lado que iniciou o ataque
             facingLeft = attackFacingLeft;
 
             attacking = true;
             attackTimer = attackDuration;
-            attackOverlay.Reset();                    // começa no frame 0:contentReference[oaicite:6]{index=6}
-            animManager.UseOffHandBase(true);         // troca base para SEM braço de trás
+            attackOverlay.Reset();                    
+            animManager.UseOffHandBase(true);         
         }
 
         // Gravidade
         Velocity.Y += gravity * dt;
 
-        // Colisão (usa FrameWidth/Height da base ativa, 17x23):contentReference[oaicite:7]{index=7}
+        // Colisão
         MoveAxis(Velocity.X * dt, 0f);
         MoveAxis(0f, Velocity.Y * dt);
 
-        // ESTADOS do corpo (não troca pra Attack)
+        // Mudança de textura
         if (!OnGround) animManager.ChangeState(AnimationState.Jump);
         else animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
 
@@ -114,7 +134,7 @@ public class Player
 
         if (attacking)
         {
-            attackOverlay.Update(gameTime);           // anima o braço:contentReference[oaicite:8]{index=8}
+            attackOverlay.Update(gameTime);           // anima o braço de ataque
 
             int f = attackOverlay.CurrentFrame;
             bool canHit = (f >= attackImpactStartFrame && f <= attackImpactEndFrame);
@@ -127,18 +147,17 @@ public class Player
             else
             {
                 attackHitActive = false;
-                attackHitRect   = Rectangle.Empty; // <-- limpa
+                attackHitRect   = Rectangle.Empty; // limpa a hitbox
             }
 
             attackTimer -= dt;
 
-            // terminou por tempo OU a overlay chegou no fim (sem loop)
             if (attackTimer <= 0f || attackOverlay.IsFinished)
             {
                 attacking = false;
-                animManager.UseOffHandBase(false);    // volta base COM braço
+                animManager.UseOffHandBase(false);
 
-                attackHitActive = false;              // <-- garante que não fica fantasma
+                attackHitActive = false;              // garante que o hitbox sumiu
                 attackHitRect = Rectangle.Empty;
             }
         }
@@ -147,11 +166,18 @@ public class Player
     public Rectangle GetBounds() =>
     new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
 
+    // Dano e knockBack no player
     public void TakeDamage(int amount, int fromDir = 0)
     {
         Health = Math.Max(0, Health - amount);
-        if (fromDir != 0)
-            Velocity.X = 140f * -Math.Sign(fromDir);
+
+        hurtTimer = HurtStunTime;
+
+        if (fromDir != 0) // fromDir > 0 significa "player está à direita do inimigo" => empurra para a direita
+        {
+            Velocity.X = HurtKbSpeed * Math.Sign(fromDir);
+            Velocity.Y = -HurtKbUp;
+        }
     }
     
     public bool TryGetAttackHitbox(out Rectangle rect)

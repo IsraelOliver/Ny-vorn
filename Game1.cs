@@ -97,8 +97,9 @@ public class Game1 : Game
         player = new Player(bodyWithArm, bodyOffHand, attackSheet);
         
         camera.Follow(player.GetPosition());
-        enemySheet = Content.Load<Texture2D>("enemy/Enemy (1)"); // ajuste o nome ao seu asset
-        enemies.Add(new Enemy(enemySheet, new Vector2(260, 90))); // spawn de teste
+        
+        enemySheet = Content.Load<Texture2D>("enemy/Enemy (1)");
+        enemies.Add(new Enemy(enemySheet, new Vector2(260, 90))); // spawn do inimigo
 
         WhitePixel = new Texture2D(GraphicsDevice, 1, 1);
         WhitePixel.SetData(new[] { Color.White });
@@ -159,21 +160,9 @@ public class Game1 : Game
         var attackSheet  = Content.Load<Texture2D>("player/playerAttack");
 
         player = new Player(bodyWithArm, bodyOffHand, attackSheet);
-        // posiciona de novo
-        // (ex.: respawn inicial)
-        // player.SetPosition(new Vector2(100, 100)); // crie um setter se quiser
 
         enemies.Clear();
         enemies.Add(new Enemy(enemySheet, new Vector2(260, 90)));
-    }
-
-    private void DrawBar(SpriteBatch sb, Rectangle rect, float pct, Color back, Color fill)
-    {
-        // fundo
-        sb.Draw(WhitePixel, rect, back);
-        // preenchimento
-        int w = (int)(rect.Width * MathHelper.Clamp(pct, 0f, 1f));
-        if (w > 0) sb.Draw(WhitePixel, new Rectangle(rect.X, rect.Y, w, rect.Height), fill);
     }
 
     protected override void Draw(GameTime gameTime)

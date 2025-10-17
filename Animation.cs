@@ -86,8 +86,10 @@ public class Animation
 
         this.IsFinished = false;         // ao trocar folha, consideramos não-finalizada
         this.timer = 0;                  // mantém passo regular entre frames
+
         // se preferir preservar sensação de tempo, pode copiar uma fração de timer aqui
         this.Reset();                    // garante sourceRect coerente com frame 0
+        
         // depois ajusta para o frame mapeado:
         for (int i = 0; i < mappedFrame; i++)
         {
