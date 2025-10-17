@@ -31,6 +31,10 @@ public class Enemy
     private const float HurtIframes = 0.25f;       // evita múltiplos hits num mesmo swing
     private float hurtTimer = 0f;
 
+    private const float KnockbackTime     = 0.3f;
+    private const float KnockbackFriction = 5000f;
+    private float knockbackTimer = 0f;
+
     // ===== Animação =====
     // Spritesheet: 2 linhas x 7 colunas | 15x22 px por frame
     private readonly Texture2D sheet;
@@ -38,8 +42,17 @@ public class Enemy
     private readonly Animation walk;
     private Animation current;
 
-    private float patrolT = 0f;
-    private int patrolDir = 1; // 1 = direita, -1 = esquerda
+    // ===== AI (FSM) =====
+    private enum AIState { Idle, Wander, Chase }
+    private AIState state = AIState.Idle;
+
+    private static readonly System.Random rng = new System.Random();
+    private float stateTimer = 0f;      // tempo restante do estado atual
+    private int wanderDir = 1;          // -1 esquerda, +1 direita
+
+    // ranges (ajuste ao gosto)
+    private readonly Vector2 idleDurRange   = new Vector2(0.7f, 2.0f);
+    private readonly Vector2 walkDurRange   = new Vector2(1.2f, 3.0f);
 
     public Enemy(Texture2D spriteSheet, Vector2 spawn)
     {
@@ -66,7 +79,30 @@ public class Enemy
 
         // knockback simples horizontal
         if (knockbackDir != 0)
-            Velocity.X = 140f * MathF.Sign(knockbackDir) * -1f; // empurra contrário ao golpe
+        {
+            // empurra para longe do atacante + leve "quique"
+            Velocity.X = 200f * -MathF.Sign(knockbackDir);
+            Velocity.Y = -80f;
+            knockbackTimer = KnockbackTime;
+        }
+    }
+
+    private float RandRange(Vector2 r) => (float)(r.X + rng.NextDouble() * (r.Y - r.X));
+
+    private void PickIdle()
+    {
+        state = AIState.Idle;
+        stateTimer = RandRange(idleDurRange);
+        Velocity.X = 0f;
+        current = idle;
+    }
+
+    private void PickWander()
+    {
+        state = AIState.Wander;
+        stateTimer = RandRange(walkDurRange);
+        wanderDir = rng.Next(0, 2) == 0 ? -1 : 1; // sorteia direção
+        current = walk;
     }
 
     public void Update(GameTime gt, Player player)
@@ -77,36 +113,88 @@ public class Enemy
         if (contactTimer > 0f) contactTimer -= dt;
         if (hurtTimer > 0f) hurtTimer -= dt;
 
-        // ===== AI: patrulha ↔ perseguição =====
+        // ===== AI: Idle ↔ Wander ↔ Chase =====
         Vector2 toPlayer = player.GetPosition() - Position;
         float dist = toPlayer.Length();
 
         float targetVX = 0f;
 
-        if (dist <= AggroDistance)
+        if (knockbackTimer > 0f)
         {
-            // perseguir
-            int dir = Math.Sign(toPlayer.X);
-            targetVX = dir * ChaseSpeed;
-            current = walk;
+            knockbackTimer -= dt;
+
+            // atrito para perder o impulso aos poucos
+            float sign = MathF.Sign(Velocity.X);
+            float decel = KnockbackFriction * dt;
+            if (MathF.Abs(Velocity.X) <= decel) Velocity.X = 0f;
+            else Velocity.X -= decel * sign;
+
+            // mantém o X atual como “alvo” e pula toda a IA deste frame
+            targetVX = Velocity.X;
         }
         else
         {
-            // patrulha ping-pong
-            patrolT += dt;
-            if (patrolT >= PatrolDuration)
+            if (dist <= AggroDistance)
             {
-                patrolT = 0f;
-                patrolDir *= -1;
+                state = AIState.Chase;
+                int dir = Math.Sign(toPlayer.X);
+                targetVX = dir * ChaseSpeed;
+                current = walk;
             }
-            targetVX = patrolDir * WalkSpeed;
-            current = (Math.Abs(targetVX) > 1f) ? walk : idle;
+            else
+            {
+                // Lógica de máquina de estados para o “vida própria”
+                if (state == AIState.Chase) { PickIdle(); } // desacopla quando sai do aggro
+
+                stateTimer -= dt;
+                switch (state)
+                {
+                    case AIState.Idle:
+                        targetVX = 0f;
+                        current = idle;
+                        if (stateTimer <= 0f)
+                        {
+                            // 60% Wander, 40% Idle de novo
+                            if (rng.NextDouble() < 0.6) PickWander(); else PickIdle();
+                        }
+                        break;
+
+                    case AIState.Wander:
+                        targetVX = wanderDir * WalkSpeed;
+                        current = walk;
+
+                        // evita encarar parede/quebra de piso: vira ou “pula” se tiver chão à frente
+                        int dir = Math.Sign(targetVX);
+                        if (OnGround && dir != 0 && WallAhead(dir))
+                        {
+                            // 50% chance de virar, 50% de pular obstáculo baixinho
+                            if (rng.NextDouble() < 0.5)
+                            {
+                                wanderDir *= -1;
+                                targetVX = wanderDir * WalkSpeed;
+                            }
+                            else
+                            {
+                                Velocity.Y = -JumpSpeed * 0.9f;
+                                OnGround = false;
+                            }
+                        }
+
+                        if (stateTimer <= 0f)
+                        {
+                            // 50% volta a Idle, 50% continua Wander (troca direção)
+                            if (rng.NextDouble() < 0.5) PickIdle();
+                            else { wanderDir = -wanderDir; PickWander(); }
+                        }
+                        break;
+                }
+            }
         }
 
         Velocity.X = targetVX;
 
         if (Math.Abs(Velocity.X) > 1f)
-        facingLeft = Velocity.X < 0;
+        facingLeft = Velocity.X > 0;
 
         int dirX = Math.Sign(Velocity.X);
         if (OnGround && dirX != 0 && WallAhead(dirX))

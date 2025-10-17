@@ -90,6 +90,7 @@ public class Player
         {
             float playerCenterX = Position.X + animManager.FrameWidth * 0.5f;
             attackFacingLeft = mouseWorld.X < playerCenterX; // trava direção do swing
+            facingLeft = attackFacingLeft;
 
             attacking = true;
             attackTimer = attackDuration;
@@ -136,6 +137,9 @@ public class Player
             {
                 attacking = false;
                 animManager.UseOffHandBase(false);    // volta base COM braço
+
+                attackHitActive = false;              // <-- garante que não fica fantasma
+                attackHitRect = Rectangle.Empty;
             }
         }
     }
