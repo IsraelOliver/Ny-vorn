@@ -8,17 +8,17 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <ApplicationIcon>Smiley.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Icon.ico" />
-    <None Remove="Icon.bmp" />
+    <None Remove="Smiley.ico" />
+    <None Remove="Smiley.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Icon.ico">
+    <EmbeddedResource Include="Smiley.ico">
       <LogicalName>Icon.ico</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Icon.bmp">
+    <EmbeddedResource Include="Smiley.bmp">
       <LogicalName>Icon.bmp</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
