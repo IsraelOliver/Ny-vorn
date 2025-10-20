@@ -5,7 +5,8 @@
   - Ny’vorn é um jogo sandbox de horror cósmico e aventura, desenvolvido em C# com MonoGame.
   - Você é Ekko, uma entidade nascida do impacto entre o vazio e o sorriso que tentou atravessá-lo — Smiley, um conceito vivo que corrompe realidades.
 
-🎥 Protótipo
+🎥 Veja uma foto da primeira versão:
+
 ![preview do projeto](https://raw.githubusercontent.com/IsraelOliver/Ny-vorn/main/GitHub/footage.png)
 
 🧩 História e Mecânica
