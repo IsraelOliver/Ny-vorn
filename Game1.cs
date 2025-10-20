@@ -102,7 +102,7 @@ public class Game1 : Game
         
         camera.Follow(player.GetPosition());
         
-        enemySheet = Content.Load<Texture2D>("enemy/Enemy (1)");
+        enemySheet = Content.Load<Texture2D>("enemy/Enemy");
         enemies.Add(new Enemy(enemySheet, new Vector2(260, 90))); // spawn do inimigo
 
         WhitePixel = new Texture2D(GraphicsDevice, 1, 1);
@@ -145,7 +145,6 @@ public class Game1 : Game
                     );
                     damage.Enqueue(e, in hit);
 
-                    // (aqui também é o hook perfeito p/ hitstop/shake se quiser)
                 }
             }
         }
