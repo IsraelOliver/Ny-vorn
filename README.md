@@ -6,7 +6,7 @@
   - Você é Ekko, uma entidade nascida do impacto entre o vazio e o sorriso que tentou atravessá-lo — Smiley, um conceito vivo que corrompe realidades.
 
 🎥 Protótipo
-<img src="https://github.com/IsraelOliver/blob/main/GitHub/footage.png?raw=true" width="700">
+![preview do projeto](https://raw.githubusercontent.com/IsraelOliver/Ny-vorn/main/GitHub/footage.png)
 
 🧩 História e Mecânica
   - Comece como uma forma incorpórea, capaz de flutuar e ler memórias.
