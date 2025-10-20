@@ -9,11 +9,16 @@
 
 ![preview do projeto](https://raw.githubusercontent.com/IsraelOliver/Ny-vorn/main/GitHub/footage.png)
 
-<p align="center"> <img src="https://github.com/IsraelOliver/Ny-vorn/blop/main/GitHub/footage.png?raw=true" width="700"> </p>
+Nesta cena, temos o **player** (preto) e um **inimigo** (roxo), usados para testes.  
+Essa é a **versão base**, que já conta com:
+  - Gravidade e colisão sólida  
+  - Sprint, pulo e ataque com hitbox real  
+  - Knockback e IA inimiga com perseguição  
+  - Sistema de animações por spritesheet  
 
-Aqui temos uma ideia inicial do player (Personagem preto) e um inimigo (Personagem roxo), Apenas para teste.
-Essa é a versão base, onde eu ja tenho mecanicas como gravidade, colisão, ataque, sprint, pulo, IA do inimigo, knockback e animações com folha de sprite.
-Atualmente o prototipo é basicamente um joguinho de lutinha entre player e um inimigo, porem como finalmente terminei a base vou começar a adicionar conteudo e mecanicas novas ao mesmo tempo em que tento manter o codigo organizado e o jogo o mais otimizado possivel.
+O protótipo atual é essencialmente um **duelo de combate** simples, mas serve como base técnica para mecânicas mais complexas.  
+Agora o foco é **expandir o conteúdo**, **polir o código** e evoluir o motor de gameplay.  
+Cada iteração aproxima o projeto da visão completa de um **sandbox de horror cósmico**.
 
 🧩 História e Mecânica
   - Comece como uma forma incorpórea, capaz de flutuar e ler memórias.
