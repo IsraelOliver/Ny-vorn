@@ -75,8 +75,7 @@ public class Animation
     public void CopyProgressFrom(Animation other)
     {
         if (other == null) return;
-
-        // Mapeia por fração do ciclo para suportar TotalFrame diferentes
+        
         double frac = (other.TotalFrame > 0)
             ? (double)other.CurrentFrame / other.TotalFrame
             : 0.0;
@@ -84,28 +83,21 @@ public class Animation
         int mappedFrame = (int)System.Math.Round(frac * this.TotalFrame);
         mappedFrame = System.Math.Clamp(mappedFrame, 0, System.Math.Max(0, this.TotalFrame - 1));
 
-        this.IsFinished = false;         // ao trocar folha, consideramos não-finalizada
-        this.timer = 0;                  // mantém passo regular entre frames
+        this.IsFinished = false;         
+        this.timer = 0;                  
 
-        // se preferir preservar sensação de tempo, pode copiar uma fração de timer aqui
-        this.Reset();                    // garante sourceRect coerente com frame 0
+        this.Reset();                    
         
-        // depois ajusta para o frame mapeado:
+
         for (int i = 0; i < mappedFrame; i++)
         {
-            // avança o frame sem esperar tempo (salta para o frame desejado)
-            // reaproveitando a lógica do Update:
-            // incrementa currentFrame respeitando loop/finish
             if (i + 1 >= this.TotalFrame)
             {
                 if (this.Loop) { /* volta ao início */ }
                 else { this.IsFinished = true; break; }
             }
         }
-        // Ajuste direto do frame (mais simples e determinístico):
-        // Como currentFrame é privado, usamos um pequeno truque:
-        // avançamos o sourceRect manualmente com base no mappedFrame:
-        // -> substitui o loop acima por:
+      
         typeof(Animation).GetField("currentFrame", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             ?.SetValue(this, mappedFrame);
         int column = this.StartColumn + mappedFrame;

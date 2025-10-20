@@ -6,7 +6,6 @@ namespace Nyvorn;
 
 public partial class Enemy : IDamageable
 {
-    // ===== Data & estado =====
     public Vector2 Position;
     private Vector2 Velocity;
     private bool OnGround;
@@ -17,42 +16,37 @@ public partial class Enemy : IDamageable
 
     Vector2 IDamageable.Position => Position;
 
-    // ===== Tunáveis =====
     private const float Gravity = 1800f;
     private const float WalkSpeed = 60f;
     private const float ChaseSpeed = 90f;
-    private const float PatrolDuration = 2.2f;     // segundos cada perna
-    private const float AggroDistance = 120f;      // quando começa a perseguir
-    private const float JumpSpeed = 420f;   // força do pulo do inimigo
-    private const int   StepAhead = 2;      // quantos pixels à frente para “sensor de parede”
+    private const float PatrolDuration = 2.2f;   
+    private const float AggroDistance = 120f;      // distancia para perseguir
+    private const float JumpSpeed = 420f;
+    private const int   StepAhead = 2;      // sensor de parede
 
     // contato / i-frames
-    private const float ContactCooldown = 0.45f;   // tempo entre danos por contato ao player
+    private const float ContactCooldown = 0.45f;   // tempo para dar dano no player
     private float contactTimer = 0f;
 
-    private const float HurtIframes = 0.25f;       // evita múltiplos hits num mesmo swing
+    private const float HurtIframes = 0.25f;       // evita múltiplos hits
     private float hurtTimer = 0f;
 
     private const float KnockbackTime     = 0.3f;
     private const float KnockbackFriction = 5000f;
     private float knockbackTimer = 0f;
 
-    // ===== Animação =====
-    // Spritesheet: 2 linhas x 7 colunas | 15x22 px por frame
     private readonly Texture2D sheet;
     private readonly Animation idle;
     private readonly Animation walk;
     private Animation current;
 
-    // ===== AI (FSM) =====
     private enum AIState { Idle, Wander, Chase }
     private AIState state = AIState.Idle;
 
     private static readonly System.Random rng = new System.Random();
-    private float stateTimer = 0f;      // tempo restante do estado atual
-    private int wanderDir = 1;          // -1 esquerda, +1 direita
+    private float stateTimer = 0f;      
+    private int wanderDir = 1;          
 
-    // ranges (ajuste ao gosto)
     private readonly Vector2 idleDurRange   = new Vector2(0.7f, 2.0f);
     private readonly Vector2 walkDurRange   = new Vector2(1.2f, 3.0f);
 
@@ -60,11 +54,10 @@ public partial class Enemy : IDamageable
     {
         sheet = spriteSheet;
 
-        // linha 0: walk (7 frames)
         walk = new Animation(sheet, frameWidth: 15, frameHeight: 22,
                              totalFrame: 7, row: 0, startColumn: 0,
                              timePerFrame: 0.08, loop: true);
-        // linha 1: idle blink (7 frames)
+
         idle = new Animation(sheet, 15, 22, 7, 1, 0, 0.15, loop: true);
 
         current = idle;
@@ -79,10 +72,8 @@ public partial class Enemy : IDamageable
         Health -= amount;
         hurtTimer = HurtIframes;
 
-        // knockback simples horizontal
         if (knockbackDir != 0)
         {
-            // empurra para longe do atacante + leve "quique"
             Velocity.X = 200f * -MathF.Sign(knockbackDir);
             Velocity.Y = -80f;
             knockbackTimer = KnockbackTime;
@@ -103,7 +94,7 @@ public partial class Enemy : IDamageable
     {
         state = AIState.Wander;
         stateTimer = RandRange(walkDurRange);
-        wanderDir = rng.Next(0, 2) == 0 ? -1 : 1; // sorteia direção
+        wanderDir = rng.Next(0, 2) == 0 ? -1 : 1; 
         current = walk;
     }
 
@@ -115,7 +106,6 @@ public partial class Enemy : IDamageable
         if (contactTimer > 0f) contactTimer -= dt;
         if (hurtTimer > 0f) hurtTimer -= dt;
 
-        // ===== AI: Idle ↔ Wander ↔ Chase =====
         Vector2 toPlayer = player.GetPosition() - Position;
         float dist = toPlayer.Length();
 
@@ -125,13 +115,11 @@ public partial class Enemy : IDamageable
         {
             knockbackTimer -= dt;
 
-            // atrito para perder o impulso aos poucos
             float sign = MathF.Sign(Velocity.X);
             float decel = KnockbackFriction * dt;
             if (MathF.Abs(Velocity.X) <= decel) Velocity.X = 0f;
             else Velocity.X -= decel * sign;
 
-            // mantém o X atual como “alvo” e pula toda a IA deste frame
             targetVX = Velocity.X;
         }
         else
@@ -145,8 +133,7 @@ public partial class Enemy : IDamageable
             }
             else
             {
-                // Lógica de máquina de estados para o “vida própria”
-                if (state == AIState.Chase) { PickIdle(); } // desacopla quando sai do aggro
+                if (state == AIState.Chase) { PickIdle(); }
 
                 stateTimer -= dt;
                 switch (state)
@@ -156,7 +143,6 @@ public partial class Enemy : IDamageable
                         current = idle;
                         if (stateTimer <= 0f)
                         {
-                            // 60% Wander, 40% Idle de novo
                             if (rng.NextDouble() < 0.6) PickWander(); else PickIdle();
                         }
                         break;
@@ -165,11 +151,9 @@ public partial class Enemy : IDamageable
                         targetVX = wanderDir * WalkSpeed;
                         current = walk;
 
-                        // evita encarar parede/quebra de piso: vira ou “pula” se tiver chão à frente
                         int dir = Math.Sign(targetVX);
                         if (OnGround && dir != 0 && WallAhead(dir))
                         {
-                            // 50% chance de virar, 50% de pular obstáculo baixinho
                             if (rng.NextDouble() < 0.5)
                             {
                                 wanderDir *= -1;
@@ -184,7 +168,6 @@ public partial class Enemy : IDamageable
 
                         if (stateTimer <= 0f)
                         {
-                            // 50% volta a Idle, 50% continua Wander (troca direção)
                             if (rng.NextDouble() < 0.5) PickIdle();
                             else { wanderDir = -wanderDir; PickWander(); }
                         }
@@ -205,24 +188,20 @@ public partial class Enemy : IDamageable
             OnGround = false;
         }
 
-
-        // gravidade
         Velocity.Y += Gravity * dt;
 
-        // movimento com colisão (igual ao player, por eixo)
         MoveAxis(Velocity.X * dt, 0f);
         MoveAxis(0f, Velocity.Y * dt);
 
         current.Update(gt);
 
-        // ===== dano por contato no player =====
+        // dano no player
         if (contactTimer <= 0f && this.Bounds.Intersects(player.GetBounds()))
         {
             int dir = Math.Sign((player.GetPosition() - Position).X);
             var hit = new HitInfo(25, dir, kbX: 220f, kbY: 120f, stun: 0.18f, src: Faction.Enemy, tag: "Contact");
 
-            // publicar no canal que está no Game1
-            game.DamageBus.Enqueue(player, in hit); // ver Passo 6 p/ expor o bus
+            game.DamageBus.Enqueue(player, in hit);
             contactTimer = ContactCooldown;
         }
     }
@@ -230,14 +209,13 @@ public partial class Enemy : IDamageable
     private bool WallAhead(int dir)
     {
         int tileSize = Game1.tileSize;
-        // “pé” do inimigo
         int footY = (int)(Position.Y + current.FrameHeight - 1);
         int frontX = (int)(Position.X + (dir > 0 ? current.FrameWidth + StepAhead : -StepAhead));
 
         int tx = Math.Max(0, frontX / tileSize);
         int ty = Math.Max(0, footY  / tileSize);
 
-        return Game1.IsSolid(tx, ty); // parede logo à frente dos pés
+        return Game1.IsSolid(tx, ty);
     }
 
     private void MoveAxis(float dx, float dy)
@@ -315,8 +293,5 @@ public partial class Enemy : IDamageable
             Velocity.Y = -hit.KnockbackY;
             knockbackTimer = KnockbackTime;
         }
-
-        // opcional: usar hit.Stun para "parar IA" por um tempinho
-        // opcional: tocar SFX/partículas via callback/evento
     }
 }

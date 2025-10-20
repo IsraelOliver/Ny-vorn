@@ -119,11 +119,9 @@ public class Game1 : Game
         var ms = Microsoft.Xna.Framework.Input.Mouse.GetState();
         Vector2 mouseScreen = new Vector2(ms.X, ms.Y);
 
-        // converte pra MUNDO usando a câmera
         Matrix inv = Matrix.Invert(camera.Transform);
         Vector2 mouseWorld = Vector2.Transform(mouseScreen, inv);
 
-        // entrega pro player antes de atualizar
         player.SetMouseWorld(mouseWorld);
         
         player.Update(gameTime);
@@ -138,7 +136,7 @@ public class Game1 : Game
 
                     var hit = new HitInfo(
                         dmg: 20, dirX: dir,
-                        kbX: 200f, kbY: 80f,   // ajuste fino
+                        kbX: 200f, kbY: 80f, 
                         stun: 0.10f,
                         src: Faction.Player,
                         tag: "Slash"
@@ -169,7 +167,7 @@ public class Game1 : Game
     
     private void ResetGame()
     {
-        // recria player e inimigos, ou zera os estados
+        // replay caso player morra
         var bodyWithArm  = Content.Load<Texture2D>("player/playerAnimation");
         var bodyOffHand  = Content.Load<Texture2D>("player/playerAnimationOffHand");
         var attackSheet  = Content.Load<Texture2D>("player/playerAttack");

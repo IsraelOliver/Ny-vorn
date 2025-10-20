@@ -26,12 +26,11 @@ public partial class Player : IDamageable
     private const float Skin = 1f;
 
     // ===== Jump Responsivo =====
-    private const float CoyoteTime     = 0.12f;  // tempo extra depois de sair da borda
-    private const float JumpBufferTime = 0.12f;  // tempo para "guardar" o pulo antes de tocar no chão
+    private const float CoyoteTime     = 0.12f; 
+    private const float JumpBufferTime = 0.12f;
     private float coyoteTimer = 0f;
     private float jumpBufferTimer = 0f;
 
-    // Para detectar "apertou agora"
     private KeyboardState prevKey, currKey;
 
     private ManagerAnimation animManager;
@@ -55,7 +54,7 @@ public partial class Player : IDamageable
     private bool attackHitActive = false;
     private Rectangle attackHitRect;
 
-    private bool drawAttackHitbox = false;   // troque pra true quando quiser ver a caixa
+    private bool drawAttackHitbox = false;   // troque pra true quando quiser ver a caixa de hitbox
     
     private const float HurtStunTime   = 0.18f;
     private const float HurtKbSpeed    = 220f;
@@ -98,37 +97,22 @@ public partial class Player : IDamageable
         }
         
         if(!inHurt) Velocity.X = vx;
-        {
-            // opcional: amortecer um pouco o knockback sem matar o impulso de cara
-            /*
-            float sign = MathF.Sign(Velocity.X);
-            float decel = 1800f * dt;
-            if (MathF.Abs(Velocity.X) <= decel) Velocity.X = 0f;
-            else Velocity.X -= decel * sign;
-            */
-        }
 
-        // Faz pular
-        // ===== Coyote Time + Jump Buffer =====
-        // Buffera quando APERTA o espaço
         bool jumpPressedThisFrame = currKey.IsKeyDown(Keys.Space) && prevKey.IsKeyUp(Keys.Space);
         if (jumpPressedThisFrame)
             jumpBufferTimer = JumpBufferTime;
 
-        // Atualiza coyote
         if (OnGround) coyoteTimer = CoyoteTime;
         else          coyoteTimer -= dt;
 
         if (jumpBufferTimer > 0f) jumpBufferTimer -= dt;
 
-        // Consome o pulo se puder (estiver no chão ou ainda dentro do coyote)
         bool canJump = (OnGround || coyoteTimer > 0f);
         if (!inHurt && canJump && jumpBufferTimer > 0f)
         {
             Velocity.Y = -jumpSpeed;
             OnGround = false;
 
-            // limpa timers para não duplicar o pulo
             jumpBufferTimer = 0f;
             coyoteTimer = 0f;
         }
@@ -185,7 +169,7 @@ public partial class Player : IDamageable
                 attacking = false;
                 animManager.UseOffHandBase(false);
 
-                attackHitActive = false;              // garante que o hitbox sumiu
+                attackHitActive = false; // garante que o hitbox sumiu
                 attackHitRect = Rectangle.Empty;
             }
         }
@@ -203,7 +187,6 @@ public partial class Player : IDamageable
     {
         Rectangle body = new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
 
-        // use a direção travada do swing
         int dir = attackFacingLeft ? -1 : 1;
 
         int x = (dir > 0) ? body.Right : body.Left - attackReachForward;
@@ -230,7 +213,7 @@ public partial class Player : IDamageable
         int minY = Math.Max(0, (aabb.Top + (int)Math.Min(0, dy) - (int)Skin) / tileSize);
         int maxY = Math.Max(0, (aabb.Bottom + (int)Math.Max(0, dy) + (int)Skin - 1) / tileSize);
 
-        OnGround = (dy > 1) ? false : OnGround; // teu comentário original:contentReference[oaicite:9]{index=9}
+        OnGround = (dy > 1) ? false : OnGround;
 
         for (int ty = minY; ty <= maxY; ty++)
             for (int tx = minX; tx <= maxX; tx++)
@@ -289,7 +272,6 @@ public partial class Player : IDamageable
             );
         }
 
-        // no Draw, quando attacking:
         if (attacking && drawAttackHitbox && attackHitActive)
         {
             spriteBatch.Draw(Game1.WhitePixel, attackHitRect, new Color(0,255,0,90));
@@ -305,9 +287,7 @@ public partial class Player : IDamageable
         var r = new Rectangle((int)Position.X - 1, (int)Position.Y - 6, barW, barH);
         float pct = Health / 100f;
 
-        // fundo
         spriteBatch.Draw(Game1.WhitePixel, r, new Color(30,30,30,180));
-        // preenchimento
         int w = (int)(r.Width * MathHelper.Clamp(pct, 0f, 1f));
         if (w > 0)
             spriteBatch.Draw(Game1.WhitePixel, new Rectangle(r.X, r.Y, w, r.Height), Color.LimeGreen);

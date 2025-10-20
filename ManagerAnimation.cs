@@ -42,7 +42,6 @@ public class ManagerAnimation
         var newSet = useOffHand ? bodyOffHand : bodyWithArm;
         if (ReferenceEquals(activeSet, newSet)) return;
 
-        // Guarda a animação/estado atuais para copiar o progresso
         var oldAnim = CurrentAnimation;
         var oldState = CurrentState;
 
@@ -51,7 +50,6 @@ public class ManagerAnimation
         var newAnim = activeSet[oldState];
         if (!ReferenceEquals(newAnim, oldAnim))
         {
-            // Copia o progresso (frame/timer) para a nova folha
             newAnim.CopyProgressFrom(oldAnim);
             CurrentAnimation = newAnim;
         }
