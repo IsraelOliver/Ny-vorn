@@ -9,6 +9,12 @@
 
 ![preview do projeto](https://raw.githubusercontent.com/IsraelOliver/Ny-vorn/main/GitHub/footage.png)
 
+<p align="center"> <img src="https://github.com/IsraelOliver/Ny-vorn/main/GitHub/footage.png?raw=true" width="700"> </p>
+
+Aqui temos uma ideia inicial do player (Personagem preto) e um inimigo (Personagem roxo), Apenas para teste.
+Essa é a versão base, onde eu ja tenho mecanicas como gravidade, colisão, ataque, sprint, pulo, IA do inimigo, knockback e animações com folha de sprite.
+Atualmente o prototipo é basicamente um joguinho de lutinha entre player e um inimigo, porem como finalmente terminei a base vou começar a adicionar conteudo e mecanicas novas ao mesmo tempo em que tento manter o codigo organizado e o jogo o mais otimizado possivel.
+
 🧩 História e Mecânica
   - Comece como uma forma incorpórea, capaz de flutuar e ler memórias.
   - Possua corpos humanos e interaja fisicamente com o mundo.
