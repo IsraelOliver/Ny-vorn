@@ -51,11 +51,6 @@ Cada iteração aproxima o projeto da visão completa de um **sandbox de horror 
   - Exploração e narrativa ramificada
   - Influências: Terraria, Starbound, Dead Cells, Bloodborne, Kyora
 
-🚀 Como Rodar
-  *  git clone https://github.com/SEUUSUARIO/Nyvorn.git
-  *  Abra no Visual Studio e execute com F5.
-
 ✨ Créditos
-
 Desenvolvido por Israel Oliver (Smiley)
 Um universo que sorri… e te observa de volta.
