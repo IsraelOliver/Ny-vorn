@@ -14,7 +14,18 @@ Essa é a **versão base**, que já conta com:
   - Gravidade e colisão sólida  
   - Sprint, pulo e ataque com hitbox real  
   - Knockback e IA inimiga com perseguição  
-  - Sistema de animações por spritesheet  
+  - Sistema de animações por spritesheet
+
+___________________________________________________________________________________________________________________________________________________
+
+## 🕹️ Baixar o jogo
+
+👉 [**Baixar Nyvorn v0.1.0 (Windows x64)**](https://github.com/IsraelOliver/Ny-vorn/releases/tag/v0.1.0)
+
+Versão **self-contained** — não precisa instalar .NET.  
+Basta extrair o `.zip` e rodar `Nyvorn.exe`.
+
+___________________________________________________________________________________________________________________________________________________
 
 O protótipo atual é essencialmente um **duelo de combate** simples, mas serve como base técnica para mecânicas mais complexas.  
 Agora o foco é **expandir o conteúdo**, **polir o código** e evoluir o motor de gameplay.  
