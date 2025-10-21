@@ -1,4 +1,4 @@
-##🌌 Ny’vorn: Echoes of the Hollow Star
+## 🌌 Ny’vorn: Echoes of the Hollow Star
 “Ele sorri porque já viu o fim… e porque ele o escreveu.”
 
 🪐 Sobre o Projeto
