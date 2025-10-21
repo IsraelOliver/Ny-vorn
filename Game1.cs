@@ -9,6 +9,17 @@ public class Game1 : Game
 {
     //Variáveis
     private GraphicsDeviceManager _graphics;
+
+    private const int VIRTUAL_W = 384;
+    private const int VIRTUAL_H = 216;
+
+    private RenderTarget2D worldRT;
+    private RenderTarget2D uiRT;
+
+    private int screenW, screenH;
+    private int scaleInt = 1;
+    private Viewport letterboxVP;
+
     private SpriteBatch _spriteBatch;
     private Texture2D tileTexture;
     private Player player;
@@ -80,14 +91,32 @@ public class Game1 : Game
     protected override void Initialize()
     {
         // TODO: Add your initialization logic here
-        
+
         base.Initialize();
+    }
+    
+    private void RecomputeViewport() {
+        scaleInt = Math.Max(1, Math.Min(screenW / VIRTUAL_W, screenH / VIRTUAL_H));
+        int vpW = VIRTUAL_W * scaleInt;
+        int vpH = VIRTUAL_H * scaleInt;
+        int vpX = (screenW - vpW) / 2;
+        int vpY = (screenH - vpH) / 2;
+        letterboxVP = new Viewport(vpX, vpY, vpW, vpH);
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+
+        worldRT = new RenderTarget2D(GraphicsDevice, VIRTUAL_W, VIRTUAL_H, false, 
+        SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+        uiRT = new RenderTarget2D(GraphicsDevice, VIRTUAL_W, VIRTUAL_H);
+
+        screenW = GraphicsDevice.Viewport.Width;
+        screenH = GraphicsDevice.Viewport.Height;
+        RecomputeViewport(); // função que você cria (abaixo)
+
+        camera = new Camera2D(VIRTUAL_W, VIRTUAL_H);
 
         ViewW = GraphicsDevice.Viewport.Width;
         ViewH = GraphicsDevice.Viewport.Height;
@@ -100,8 +129,6 @@ public class Game1 : Game
 
         player = new Player(bodyWithArm, bodyOffHand, attackSheet);
         
-        camera.Follow(player.GetPosition());
-        
         enemySheet = Content.Load<Texture2D>("enemy/Enemy");
         enemies.Add(new Enemy(enemySheet, new Vector2(260, 90))); // spawn do inimigo
 
@@ -113,20 +140,45 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        // Sair com ESC/back (igual ao teu)
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
+            || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+        // === Mouse (tela real) -> coords virtuais -> mundo (camera) ===
         var ms = Microsoft.Xna.Framework.Input.Mouse.GetState();
-        Vector2 mouseScreen = new Vector2(ms.X, ms.Y);
+        int mx = ms.X, my = ms.Y;
 
-        Matrix inv = Matrix.Invert(camera.Transform);
-        Vector2 mouseWorld = Vector2.Transform(mouseScreen, inv);
+        // Remove offset do letterbox/pillarbox
+        int sx = mx - letterboxVP.X;
+        int sy = my - letterboxVP.Y;
 
-        player.SetMouseWorld(mouseWorld);
-        
-        player.Update(gameTime);
+        Vector2 mouseWorld;
+        if (sx >= 0 && sy >= 0 && sx < letterboxVP.Width && sy < letterboxVP.Height && scaleInt > 0)
+        {
+            // volta para a resolução virtual pixel-perfect
+            Vector2 virt = new Vector2(sx / (float)scaleInt, sy / (float)scaleInt);
 
-        if (player.TryGetAttackHitbox(out var atk))
+            // remove a transformação da câmera
+            Matrix inv = Matrix.Invert(camera.Transform);
+            mouseWorld = Vector2.Transform(virt, inv);
+        }
+        else
+        {
+            // fallback: se o mouse estiver fora do viewport, só inverte a câmera da posição bruta
+            Matrix inv = Matrix.Invert(camera.Transform);
+            mouseWorld = Vector2.Transform(new Vector2(mx, my), inv);
+        }
+
+        // entrega ao Player (como você já faz hoje)
+        player.SetMouseWorld(mouseWorld);  // :contentReference[oaicite:2]{index=2}
+
+        // === Atualiza Player ===
+        player.Update(gameTime);           // :contentReference[oaicite:3]{index=3}
+
+        // === Dano por ataque do Player nos inimigos (igual ao teu) ===
+        if (player.TryGetAttackHitbox(out var atk))   // :contentReference[oaicite:4]{index=4}
         {
             foreach (var e in enemies)
             {
@@ -136,27 +188,28 @@ public class Game1 : Game
 
                     var hit = new HitInfo(
                         dmg: 20, dirX: dir,
-                        kbX: 200f, kbY: 80f, 
+                        kbX: 200f, kbY: 80f,
                         stun: 0.10f,
                         src: Faction.Player,
                         tag: "Slash"
                     );
-                    damage.Enqueue(e, in hit);
-
+                    damage.Enqueue(e, in hit);       // :contentReference[oaicite:5]{index=5}
                 }
             }
         }
 
+        // === Atualiza inimigos, limpa mortos, despacha danos (igual ao teu) ===
         foreach (var e in enemies)
-            e.Update(gameTime, player, this);
+            e.Update(gameTime, player, this);        // :contentReference[oaicite:6]{index=6}
 
-        enemies.RemoveAll(e => e.IsDead);
+        enemies.RemoveAll(e => e.IsDead);            // :contentReference[oaicite:7]{index=7}
+        damage.DispatchAll();                        // :contentReference[oaicite:8]{index=8}
 
-        damage.DispatchAll();
+        // === Câmera segue o player (igual ao teu) ===
+        camera.FollowSmooth(player.GetPosition(), dt, 17, 23);         // :contentReference[oaicite:9]{index=9}
 
-        camera.Follow(player.GetPosition());
-
-        if (player.Health <= 0)
+        // === Reset se player morreu (igual ao teu) ===
+        if (player.Health <= 0)                      // :contentReference[oaicite:10]{index=10}
         {
             ResetGame();
             return;
@@ -180,26 +233,45 @@ public class Game1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
 
         // TODO: Add your drawing code here
-        _spriteBatch.Begin(transformMatrix: camera.Transform);
+        GraphicsDevice.SetRenderTarget(worldRT);
+        GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        for (int y = 0; y < map.GetLength(0); y++)
-        {
-            for (int x = 0; x < map.GetLength(1); x++)
-            {
-                if (map[y, x] == 1)
-                {
-                    _spriteBatch.Draw(tileTexture, new Vector2(x * tileSize, y * tileSize), Color.White);
-                }
-            }
-        }
+        // 1) Mundo no RT virtual
+        _spriteBatch.Begin(
+            samplerState: SamplerState.PointClamp,
+            transformMatrix: camera.Transform
+        );
+            // tiles, player, inimigos já existem:
+            // (o seu loop do mapa + player.Draw + inimigos.Draw)  :contentReference[oaicite:2]{index=2}
+            for (int y = 0; y < map.GetLength(0); y++)
+                for (int x = 0; x < map.GetLength(1); x++)
+                    if (map[y, x] == 1)
+                        _spriteBatch.Draw(tileTexture, new Vector2(x * tileSize, y * tileSize), Color.White);
 
-        player.Draw(_spriteBatch);
+            player.Draw(_spriteBatch);                // usa internamente ManagerAnimation/Attack etc. 
+            foreach (var e in enemies) e.Draw(_spriteBatch);  // :contentReference[oaicite:4]{index=4}
+        _spriteBatch.End();
 
-        foreach (var e in enemies) e.Draw(_spriteBatch);
+        // 2) UI no RT próprio (se quiser HUD/menus separados)
+        GraphicsDevice.SetRenderTarget(uiRT);
+        GraphicsDevice.Clear(Color.Transparent);
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        // desenhe HUD aqui (barras, texto etc.)
+        _spriteBatch.End();
 
+        // 3) Compose no backbuffer com letterbox/pillarbox
+        GraphicsDevice.SetRenderTarget(null);
+        GraphicsDevice.Clear(Color.Black);
+        GraphicsDevice.Viewport = letterboxVP;
+
+        _spriteBatch.Begin(
+            samplerState: SamplerState.PointClamp,
+            blendState: BlendState.NonPremultiplied
+        );
+        _spriteBatch.Draw(worldRT, destinationRectangle: new Rectangle(0, 0, VIRTUAL_W * scaleInt, VIRTUAL_H * scaleInt), Color.White);
+        _spriteBatch.Draw(uiRT,    destinationRectangle: new Rectangle(0, 0, VIRTUAL_W * scaleInt, VIRTUAL_H * scaleInt), Color.White);
         _spriteBatch.End();
 
         base.Draw(gameTime);

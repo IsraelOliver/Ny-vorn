@@ -34,10 +34,11 @@ Cada iteração aproxima o projeto da visão completa de um **sandbox de horror 
 
 🎮 Características
   - Pixel art atmosférica
+    + Ideia para o futuro: Queia fazer um mundo que fosse totalmente moldavel com pixels mesmo, em vez de tiles ou blocos. Cada pixel pode ser  alterado.
   - Construção e destruição de terreno 
   - Crafting e progressão mental
   - Exploração e narrativa ramificada
-  - Influências: Terraria, Starbound, Dead Cells, Bloodborne
+  - Influências: Terraria, Starbound, Dead Cells, Bloodborne, Kyora
 
 🚀 Como Rodar
   *  git clone https://github.com/SEUUSUARIO/Nyvorn.git
