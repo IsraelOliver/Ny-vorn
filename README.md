@@ -39,8 +39,8 @@ Cada iteração aproxima o projeto da visão completa de um **sandbox de horror 
 
 🌍 Universo
   - Dois sistemas solares:
-    * Áuralis — ainda íntegro, lar de Ekko.
-    * Desconhecido — dominado pelo sorriso de Smiley.
+    * Áuralis — intacto, lar do Protagonista.
+    * Desconhecido (Ainda estou decidindo) — dominado e conrrompido pelo Smiley.
   - Cada planeta guarda civilizações, ruínas e horrores únicos.
 
 🎮 Características
