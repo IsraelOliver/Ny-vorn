@@ -13,6 +13,18 @@ public class Game1 : Game
     private const int VIRTUAL_W = 384;
     private const int VIRTUAL_H = 216;
 
+    // topo da classe Game1 (perto dos outros campos)
+    private enum GameMode { Playing, Paused }
+    private GameMode mode = GameMode.Playing;
+
+    private KeyboardState _prevKey, _currKey;
+    private SpriteFont uiFont;               // fonte da UI (opcional, veja nota)
+    private int menuIndex = 0;
+    private readonly string[] menu = { "Zoom -", "Zoom +", "Reiniciar", "Sair do Jogo" };
+
+    // ajuste de zoom por passo
+    private const float ZoomStep = 0.1f;
+
     private RenderTarget2D worldRT;
     private RenderTarget2D uiRT;
 
@@ -108,6 +120,8 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+        uiFont = Content.Load<SpriteFont>("fonts/UiFont");
+
         worldRT = new RenderTarget2D(GraphicsDevice, VIRTUAL_W, VIRTUAL_H, false, 
         SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
         uiRT = new RenderTarget2D(GraphicsDevice, VIRTUAL_W, VIRTUAL_H);
@@ -140,11 +154,58 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        // Sair com ESC/back (igual ao teu)
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-            || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            Exit();
+        _prevKey = _currKey;
+        _currKey = Keyboard.GetState();
+
+        bool escDownNow   = _currKey.IsKeyDown(Keys.Escape);
+        bool escWasDown   = _prevKey.IsKeyDown(Keys.Escape);
+        bool escPressed   = escDownNow && !escWasDown;
+
+        if (escPressed)
+        {
+            // alterna pausa
+            mode = (mode == GameMode.Playing) ? GameMode.Paused : GameMode.Playing;
+        }
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (mode == GameMode.Paused)
+        {
+            // navegação
+            bool up    = _currKey.IsKeyDown(Keys.Up)    && !_prevKey.IsKeyDown(Keys.Up);
+            bool down  = _currKey.IsKeyDown(Keys.Down)  && !_prevKey.IsKeyDown(Keys.Down);
+            bool left  = _currKey.IsKeyDown(Keys.Left)  && !_prevKey.IsKeyDown(Keys.Left);
+            bool right = _currKey.IsKeyDown(Keys.Right) && !_prevKey.IsKeyDown(Keys.Right);
+            bool enter = _currKey.IsKeyDown(Keys.Enter) && !_prevKey.IsKeyDown(Keys.Enter);
+
+            if (up)   menuIndex = (menuIndex - 1 + menu.Length) % menu.Length;
+            if (down) menuIndex = (menuIndex + 1) % menu.Length;
+
+            // “Zoom - / Zoom +” respondem à esquerda/direita (ou Enter também)
+            if (menuIndex == 0 && (left || enter))
+            {
+                camera.SetZoom(camera.Zoom - ZoomStep); // usa clamp interno do Camera2D
+            }
+            if (menuIndex == 1 && (right || enter))
+            {
+                camera.SetZoom(camera.Zoom + ZoomStep);
+            }
+
+            // Reiniciar
+            if (menuIndex == 2 && enter)
+            {
+                ResetGame();
+                mode = GameMode.Playing;
+            }
+
+            // Sair
+            if (menuIndex == 3 && enter)
+            {
+                Exit();
+            }
+
+            base.Update(gameTime);
+            return; // IMPORTANTE: não atualiza mundo enquanto pausado
+        }
 
         // === Mouse (tela real) -> coords virtuais -> mundo (camera) ===
         var ms = Microsoft.Xna.Framework.Input.Mouse.GetState();
@@ -257,9 +318,52 @@ public class Game1 : Game
         // 2) UI no RT próprio (se quiser HUD/menus separados)
         GraphicsDevice.SetRenderTarget(uiRT);
         GraphicsDevice.Clear(Color.Transparent);
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        // desenhe HUD aqui (barras, texto etc.)
-        _spriteBatch.End();
+
+        if (mode == GameMode.Paused)
+        {
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
+
+            // overlay cobrindo a tela virtual inteira (NÃO multiplica por scaleInt aqui)
+            _spriteBatch.Draw(WhitePixel, new Rectangle(0, 0, VIRTUAL_W, VIRTUAL_H), new Color(0, 0, 0, 140));
+
+            // painel central em coordenadas VIRTUAIS
+            int panelW = 320, panelH = 180;
+            int px = (VIRTUAL_W - panelW) / 2;
+            int py = (VIRTUAL_H - panelH) / 2;
+
+            _spriteBatch.Draw(WhitePixel, new Rectangle(px, py, panelW, panelH), new Color(20, 20, 30, 200));
+            _spriteBatch.Draw(WhitePixel, new Rectangle(px, py, panelW, 2), Color.White);
+            _spriteBatch.Draw(WhitePixel, new Rectangle(px, py + panelH - 2, panelW, 2), Color.White);
+
+            if (uiFont != null)
+            {
+                string title = "PAUSADO";
+                var titleSize = uiFont.MeasureString(title);
+                _spriteBatch.DrawString(uiFont, title, new Vector2(px + (panelW - titleSize.X) / 2, py + 12), Color.White);
+
+                int startY = py + 50;
+                for (int i = 0; i < menu.Length; i++)
+                {
+                    string line = (i == 0) ? $"{menu[i]}  (Zoom = {camera.Zoom:0.0})" : menu[i];
+                    Color c = (i == menuIndex) ? Color.Yellow : Color.White;
+                    _spriteBatch.DrawString(uiFont, line, new Vector2(px + 24, startY + i * 28), c);
+                    if (i == menuIndex)
+                        _spriteBatch.DrawString(uiFont, ">", new Vector2(px + 8, startY + i * 28), c);
+                }
+                
+                _spriteBatch.DrawString(uiFont, "UP/DOWN navegar  -  LEFT/RIGHT ajustar  -  Enter confirmar  -  ESC voltar",
+                    new Vector2(px + 16, py + panelH - 28), new Color(220, 220, 220));
+            }
+
+            _spriteBatch.End();
+        }
+        else
+        {
+            // HUD normal (se tiver)
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            // ... desenhe HUD aqui ...
+            _spriteBatch.End();
+        }
 
         // 3) Compose no backbuffer com letterbox/pillarbox
         GraphicsDevice.SetRenderTarget(null);

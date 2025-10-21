@@ -123,3 +123,4 @@ c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vo
 c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\Content\player\playerAttack.xnb
 c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\Content\enemy\Enemy (1).xnb
 c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\Content\enemy\Enemy.xnb
+c:\Users\Israel\Desktop\Israel\Programação\Game Project - C#\Projetos C#\Ny'vorn\Nyvorn\bin\Debug\net8.0\Content\fonts\UiFont.xnb

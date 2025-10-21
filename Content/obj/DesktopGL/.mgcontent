@@ -5,7 +5,6 @@
   <Config />
   <SourceFiles>
     <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/enemy/Enemy.png</File>
-    <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/fonts/UiFont.spritefont</File>
     <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/player/playerAnimation.png</File>
     <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/player/playerAnimationOffHand.png</File>
     <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/player/playerAttack.png</File>
@@ -13,7 +12,6 @@
     <File>c:/Users/Israel/Desktop/Israel/Programação/Game Project - C#/Projetos C#/Ny'vorn/Nyvorn/Content/tileMap/orange.png</File>
   </SourceFiles>
   <DestFiles>
-    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
