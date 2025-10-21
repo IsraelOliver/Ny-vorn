@@ -51,6 +51,23 @@ Cada iteração aproxima o projeto da visão completa de um **sandbox de horror 
   - Exploração e narrativa ramificada
   - Influências: Terraria, Starbound, Dead Cells, Bloodborne, Kyora
 
+# 🧠 Tecnologias
+
+  - **C# / .NET 8.0**
+  - **MonoGame Framework**
+  - **Visual Studio**
+  - **Pixel Art / Aseprite**
+  - **JSON Data System (em desenvolvimento)**
+
+# 🚀 Roadmap
+
+  - [x] Sistema base (movimento, colisão, física)
+  - [x] IA e combate
+  - [ ] Sistema de armas via JSON externo
+  - [ ] Mapa procedural
+  - [ ] Interface e HUD
+  - [ ] Conteúdo narrativo e lore
+
 ✨ Créditos
 Desenvolvido por Israel Oliver (Smiley)
 Um universo que sorri… e te observa de volta.
