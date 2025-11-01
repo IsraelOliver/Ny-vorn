@@ -93,6 +93,19 @@ public class Camera2D
         lastTarget = centeredTarget;
     }
 
+    public Vector2 TopLeftWorld => new Vector2(
+        (float)Math.Floor(camPos.X),
+        (float)Math.Floor(camPos.Y)
+    );
+
+    public Point ViewportWorldSize =>
+        new Point(
+            (int)Math.Ceiling(viewportWidth / Zoom),
+            (int)Math.Ceiling(viewportHeight / Zoom)
+        );
+
+    
+
     // (o seu Follow antigo pode continuar aqui, intacto)
     /*     public void Follow(Vector2 target, int spriteWidth = 17, int spriteHeight = 23)
     {

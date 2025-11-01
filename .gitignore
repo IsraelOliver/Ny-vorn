@@ -1,0 +1,46 @@
+##############################
+# 🔧 Build e compilação (.NET)
+##############################
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.db
+*.log
+
+##############################
+# 🧱 Publicações e releases
+##############################
+**/publish/
+*.zip
+*.7z
+*.tar.gz
+
+##############################
+# 🧩 MonoGame Content Pipeline
+##############################
+Content/bin/
+Content/obj/
+*.xnb
+*.mgstats
+
+##############################
+# 💾 Configurações locais do VS / Rider
+##############################
+.vs/
+.idea/
+*.user
+*.suo
+*.csproj.user
+*.sln.docstates
+
+##############################
+# 🧰 Ferramentas e ambiente
+##############################
+*.ps1
+*.bat
+*.cmd
+*.DS_Store
+Thumbs.db

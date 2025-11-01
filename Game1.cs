@@ -47,8 +47,10 @@ public class Game1 : Game
     private System.Collections.Generic.List<Enemy> enemies = new();
 
     // MAPA //
-    public static int tileSize = 23;
-
+    public static int tileSize = 9;
+    private Map map;
+    public static Map WorldMap;
+    /*
     //Mapa feito com matriz
     private static int[,] map = new int[,] {
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -80,16 +82,16 @@ public class Game1 : Game
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
     };
-
+    */
     //Metodo para verificar se um tile é solido
 
     public static bool IsSolid(int tileX, int tileY)
     {
         // Evita erro por acesso fora da matriz
-        if (tileY < 0 || tileY >= map.GetLength(0) || tileX < 0 || tileX >= map.GetLength(1))
+        if (WorldMap == null || !WorldMap.InBounds(tileX, tileY))
             return false;
 
-        return map[tileY, tileX] == 1;
+        return WorldMap.IsSolid(tileX, tileY);
     }
 
     //Contrutor da classe Game1
@@ -148,6 +150,40 @@ public class Game1 : Game
 
         WhitePixel = new Texture2D(GraphicsDevice, 1, 1);
         WhitePixel.SetData(new[] { Color.White });
+
+        // === MAPA: cria, gera e expõe no ponteiro estático ===
+        int widthTiles  = 400;           // pode ajustar depois
+        int heightTiles = 220;           // idem
+
+        map = new Map(GraphicsDevice, widthTiles, heightTiles, tileSize, seed: 1337);
+        map.Regenerate();                // superfície + cavernas + minério
+        WorldMap = map;                  // para Game1.IsSolid(...) funcionar
+
+        // Calcula spawn central
+        Point spawnTile = map.FindCenterSpawnTile();
+
+        // Vamos posicionar o player acima do chão, no centro horizontal do tile.
+        // OBS: Como não sabemos a altura do seu player, posiciono um pouco acima e a gravidade assenta.
+        Vector2 spawnWorldCenter = map.TileCenterToWorld(spawnTile.X, spawnTile.Y);
+        Vector2 spawnWorld = new Vector2(spawnWorldCenter.X, spawnWorldCenter.Y - map.TileSize * 0.6f);
+
+        // Ajusta a posição do player (use o método que você tiver: SetPosition/Teleport/Position)
+        if (player is not null)
+        {
+            // tente o que existir no seu Player:
+            // player.SetPosition(spawnWorld);
+            // player.Teleport(spawnWorld);
+            player.Position = spawnWorld; // se a propriedade for pública
+        }
+
+        // (Opcional) centraliza a câmera já no primeiro frame, se sua Camera2D tiver método pra isso:
+        try
+        {
+            // Ex.: se existir um método CenterOn/SnapTo
+            // camera.CenterOn(spawnWorld);
+            // camera.SnapTo(spawnWorld);
+        }
+        catch {}
  
         // TODO: use this.Content to load your game content here
     }
@@ -304,12 +340,15 @@ public class Game1 : Game
             samplerState: SamplerState.PointClamp,
             transformMatrix: camera.Transform
         );
-            // tiles, player, inimigos já existem:
-            // (o seu loop do mapa + player.Draw + inimigos.Draw)  :contentReference[oaicite:2]{index=2}
-            for (int y = 0; y < map.GetLength(0); y++)
-                for (int x = 0; x < map.GetLength(1); x++)
-                    if (map[y, x] == 1)
-                        _spriteBatch.Draw(tileTexture, new Vector2(x * tileSize, y * tileSize), Color.White);
+
+            Point viewWorld = camera.ViewportWorldSize; // já considera o Zoom
+            Vector2 topLeft = camera.TopLeftWorld; 
+
+            map.Draw(_spriteBatch, viewWorld, topLeft);
+
+            // Player e inimigos continuam logo depois
+            player.Draw(_spriteBatch);
+            foreach (var e in enemies) e.Draw(_spriteBatch);
 
             player.Draw(_spriteBatch);                // usa internamente ManagerAnimation/Attack etc. 
             foreach (var e in enemies) e.Draw(_spriteBatch);  // :contentReference[oaicite:4]{index=4}

@@ -10,7 +10,7 @@ public partial class Player : IDamageable
 {
     public int Health { get; private set; } = 100; // Vida do player.
     
-    private Vector2 Position, Velocity;
+    public Vector2 Position, Velocity;
     private bool facingLeft = false; // sensor para verificar o lado do player.
     private bool isMoving = false; // sensor de movimento.
     private bool OnGround = false; // sensor para ver se esta no chão.
