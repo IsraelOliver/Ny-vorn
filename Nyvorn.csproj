@@ -15,6 +15,9 @@
     <None Remove="Smiley.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\Data\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <EmbeddedResource Include="Smiley.ico">
       <LogicalName>Icon.ico</LogicalName>
     </EmbeddedResource>

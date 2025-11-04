@@ -1,0 +1,27 @@
+{
+  "stats": {
+    "health": 100,
+    "maxHealth": 100,
+    "darkEnergy": 100,
+    "maxDarkEnergy": 100
+  },
+  
+  "movement": {
+    "walkSpeed": 120.0,
+    "sprintSpeed": 200.0,
+    "gravity": 1800.0,
+    "jumpSpeed": 500.0,
+    "coyoteTime": 0.12,
+    "jumpBuffer": 0.12
+  },
+
+  "attack": {
+    "baseDamage": 20,
+    "duration": 0.22,
+    "impactFrames": [2, 3],
+    "hitbox": { "reachForward": 10, "height": 12, "yOffset": 1 }
+  },
+
+  "visual": { "idleFrameRate": 0.15, "walkFrameRate": 0.03 }
+
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Nyvorn.Configs; // ← novo: referência à config do player
 
 namespace Nyvorn;
 
@@ -12,22 +13,23 @@ public partial class Player : IDamageable
     
     public Vector2 Position, Velocity;
     private bool facingLeft = false; // sensor para verificar o lado do player.
-    private bool isMoving = false; // sensor de movimento.
-    private bool OnGround = false; // sensor para ver se esta no chão.
+    private bool isMoving = false;   // sensor de movimento.
+    private bool OnGround = false;   // sensor para ver se esta no chão.
 
     private MouseState prevMouse, currMouse;
     private Vector2 mouseWorld;
     public void SetMouseWorld(Vector2 world) => mouseWorld = world;
 
-    private float walkSpeed = 120f; // velocidade da andada
-    private float sprintSpeed = 200f; // velocidade da corrida
-    private float gravity = 1800f; // força da gravidade
-    private float jumpSpeed = 500f; // força do pulo
+    // --- MOVIMENTO ---
+    private float walkSpeed = 120f;
+    private float sprintSpeed = 200f;
+    private float gravity = 1800f;
+    private float jumpSpeed = 500f;
     private const float Skin = 1f;
 
     // ===== Jump Responsivo =====
-    private const float CoyoteTime     = 0.12f; 
-    private const float JumpBufferTime = 0.12f;
+    private float CoyoteTime     = 0.12f; 
+    private float JumpBufferTime = 0.12f;
     private float coyoteTimer = 0f;
     private float jumpBufferTimer = 0f;
 
@@ -35,39 +37,67 @@ public partial class Player : IDamageable
 
     private ManagerAnimation animManager;
 
-    // ataque com overlay
-    private Animation attackOverlay; //animação do braço
+    // --- ATAQUE ---
+    private Animation attackOverlay; // animação do braço
     private bool attacking = false;
     private float attackTimer = 0f;
-    private float attackDuration = 0.22f; // velocidade do ataque
+    private float attackDuration = 0.22f;
 
-    // ataque hitbox
-    private int attackReachForward = 10;  // alcance do ataque (hitbox do ataque)
-    private int attackHeight = 12;        // tamanho do arco do golpe (aumenta para baixo, ajustar junto com a altura)
-    private int attackYOffset = 1;        // altura do ataque (começa de cima)
+    // hitbox de ataque
+    private int attackReachForward = 10;
+    private int attackHeight = 12;
+    private int attackYOffset = 1;
 
     private int attackImpactStartFrame = 2;
     private int attackImpactEndFrame = 3;
 
     private bool attackFacingLeft = false;
- 
     private bool attackHitActive = false;
     private Rectangle attackHitRect;
+    private bool drawAttackHitbox = false;   // true para debug
 
-    private bool drawAttackHitbox = false;   // troque pra true quando quiser ver a caixa de hitbox
-    
     private const float HurtStunTime   = 0.18f;
     private const float HurtKbSpeed    = 220f;
     private const float HurtKbUp       = 120f;
     private float hurtTimer = 0f;
 
-    public Player(Texture2D bodyWithArm, Texture2D bodyOffHand, Texture2D attackSheet)
+    // --- NOVO: Config carregada via JSON ---
+    private readonly PlayerConfig cfg;
+
+    public Player(Texture2D bodyWithArm, Texture2D bodyOffHand, Texture2D attackSheet, PlayerConfig config)
     {
+        cfg = config ?? new PlayerConfig();
+
         animManager = new ManagerAnimation(bodyWithArm, bodyOffHand);
         Position = new Vector2(100, 100);
 
-        int frames = 4;
+        // --- aplica MOVIMENTO do JSON ---
+        walkSpeed   = cfg.Movement.WalkSpeed;
+        sprintSpeed = cfg.Movement.SprintSpeed;
+        gravity     = cfg.Movement.Gravity;
+        jumpSpeed   = cfg.Movement.JumpSpeed;
+        CoyoteTime     = cfg.Movement.CoyoteTime;
+        JumpBufferTime = cfg.Movement.JumpBuffer;
+
+        // --- aplica ATAQUE do JSON ---
+        attackDuration = cfg.Attack.Duration;
+
+        if (cfg.Attack.ImpactFrames is { Length: > 0 })
+        {
+            attackImpactStartFrame = cfg.Attack.ImpactFrames[0];
+            attackImpactEndFrame   = cfg.Attack.ImpactFrames[^1];
+        }
+
+        attackReachForward = cfg.Attack.Hitbox.ReachForward;
+        attackHeight       = cfg.Attack.Hitbox.Height;
+        attackYOffset      = cfg.Attack.Hitbox.YOffset;
+
+        // overlay de ataque (animação do braço)
+        int frames = 4; 
         attackOverlay = new Animation(attackSheet, 23, 23, frames, 0, 0, 0.03, loop: false);
+
+        // vida inicial
+        Health = cfg.Stats.Health;
     }
 
     public void Update(GameTime gameTime)
@@ -85,7 +115,7 @@ public partial class Player : IDamageable
         bool inHurt = hurtTimer > 0f;
         if (inHurt) hurtTimer -= dt;
 
-        // Faz andar
+        // === Movimento lateral ===
         isMoving = false;
         float speed = currKey.IsKeyDown(Keys.LeftShift) ? sprintSpeed : walkSpeed;
         float vx = 0f;
@@ -98,6 +128,7 @@ public partial class Player : IDamageable
         
         if(!inHurt) Velocity.X = vx;
 
+        // === Pulo ===
         bool jumpPressedThisFrame = currKey.IsKeyDown(Keys.Space) && prevKey.IsKeyUp(Keys.Space);
         if (jumpPressedThisFrame)
             jumpBufferTimer = JumpBufferTime;
@@ -117,11 +148,11 @@ public partial class Player : IDamageable
             coyoteTimer = 0f;
         }
 
-        // Faz atacar
+        // === Ataque ===
         if (leftClicked && !attacking)
         {
             float playerCenterX = Position.X + animManager.FrameWidth * 0.5f;
-            attackFacingLeft = mouseWorld.X < playerCenterX; // faz atacar semrpe para o mesmo lado que iniciou o ataque
+            attackFacingLeft = mouseWorld.X < playerCenterX;
             facingLeft = attackFacingLeft;
 
             attacking = true;
@@ -137,17 +168,16 @@ public partial class Player : IDamageable
         MoveAxis(Velocity.X * dt, 0f);
         MoveAxis(0f, Velocity.Y * dt);
 
-        // Mudança de textura
+        // Animação
         if (!OnGround) animManager.ChangeState(AnimationState.Jump);
         else animManager.ChangeState(isMoving ? AnimationState.Walking : AnimationState.Idle);
 
-        // Update das animações
         animManager.Update(gameTime);
 
+        // Lógica do ataque
         if (attacking)
         {
-            attackOverlay.Update(gameTime);           // anima o braço de ataque
-
+            attackOverlay.Update(gameTime);           
             int f = attackOverlay.CurrentFrame;
             bool canHit = (f >= attackImpactStartFrame && f <= attackImpactEndFrame);
 
@@ -159,7 +189,7 @@ public partial class Player : IDamageable
             else
             {
                 attackHitActive = false;
-                attackHitRect   = Rectangle.Empty; // limpa a hitbox
+                attackHitRect   = Rectangle.Empty;
             }
 
             attackTimer -= dt;
@@ -168,15 +198,15 @@ public partial class Player : IDamageable
             {
                 attacking = false;
                 animManager.UseOffHandBase(false);
-
-                attackHitActive = false; // garante que o hitbox sumiu
+                attackHitActive = false;
                 attackHitRect = Rectangle.Empty;
             }
         }
     }
 
     public Rectangle GetBounds() =>
-    new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
+        new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
+
     public bool TryGetAttackHitbox(out Rectangle rect)
     {
         rect = attackHitRect;
@@ -188,7 +218,6 @@ public partial class Player : IDamageable
         Rectangle body = new Rectangle((int)Position.X, (int)Position.Y, animManager.FrameWidth, animManager.FrameHeight);
 
         int dir = attackFacingLeft ? -1 : 1;
-
         int x = (dir > 0) ? body.Right : body.Left - attackReachForward;
         int y = body.Y + attackYOffset;
 
@@ -203,8 +232,8 @@ public partial class Player : IDamageable
         Rectangle aabb = new(
             (int)newPos.X,
             (int)newPos.Y,
-            animManager.FrameWidth,    // 17
-            animManager.FrameHeight    // 23
+            animManager.FrameWidth,
+            animManager.FrameHeight
         );
 
         int tileSize = Game1.tileSize;
@@ -244,14 +273,11 @@ public partial class Player : IDamageable
     public void Draw(SpriteBatch spriteBatch)
     {
         SpriteEffects fx = facingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
         animManager.Draw(spriteBatch, Position, fx);
 
         if (attacking)
         {
-            // o overlay segue a direção travada do swing
             SpriteEffects attackFx = attackFacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
             Vector2 offs = attackOffsetByState[animManager.CurrentState];
             int baseW = animManager.FrameWidth;
             int overlayW = attackOverlay.FrameWidth;
@@ -273,9 +299,7 @@ public partial class Player : IDamageable
         }
 
         if (attacking && drawAttackHitbox && attackHitActive)
-        {
             spriteBatch.Draw(Game1.WhitePixel, attackHitRect, new Color(0,255,0,90));
-        }
 
         if (attacking && drawAttackHitbox)
         {
@@ -292,20 +316,19 @@ public partial class Player : IDamageable
         if (w > 0)
             spriteBatch.Draw(Game1.WhitePixel, new Rectangle(r.X, r.Y, w, r.Height), Color.LimeGreen);
     }
-    public Vector2 GetPosition() => Position;
 
+    public Vector2 GetPosition() => Position;
     public bool IsAlive => Health > 0;
     public Rectangle Bounds => GetBounds();
     Vector2 IDamageable.Position => Position;
 
     public void TakeDamage(int amount, int fromDir = 0)
-    => ApplyHit(new HitInfo(amount, fromDir, HurtKbSpeed, HurtKbUp, HurtStunTime, Faction.Enemy, "Legacy"));
+        => ApplyHit(new HitInfo(amount, fromDir, HurtKbSpeed, HurtKbUp, HurtStunTime, Faction.Enemy, "Legacy"));
 
     public void ApplyHit(in HitInfo hit)
     {
         Health = Math.Max(0, Health - hit.Damage);
-
-        hurtTimer = hit.Stun; // reaproveita seu HurtStunTime se preferir
+        hurtTimer = hit.Stun;
 
         if (hit.DirX != 0)
         {
@@ -313,4 +336,7 @@ public partial class Player : IDamageable
             Velocity.Y = -hit.KnockbackY;
         }
     }
+
+    // Extra helper para Game1 (pegar o dano base do JSON)
+    public int GetBaseDamage() => cfg.Attack.BaseDamage;
 }

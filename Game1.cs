@@ -1,7 +1,9 @@
-﻿using System;
+﻿﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Nyvorn.Configs;   // ← usa PlayerConfig
+using Nyvorn.Data;      // ← usa JsonLoader
 
 namespace Nyvorn; 
 
@@ -50,9 +52,11 @@ public class Game1 : Game
     public static int tileSize = 9;
     private Map map;
     public static Map WorldMap;
-    
-    //Metodo para verificar se um tile é solido
 
+    // === NOVO: manter config do player para recriações ===
+    private PlayerConfig playerCfg;
+
+    //Metodo para verificar se um tile é solido
     public static bool IsSolid(int tileX, int tileY)
     {
         // Evita erro por acesso fora da matriz
@@ -72,8 +76,6 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-
         base.Initialize();
     }
     
@@ -98,7 +100,7 @@ public class Game1 : Game
 
         screenW = GraphicsDevice.Viewport.Width;
         screenH = GraphicsDevice.Viewport.Height;
-        RecomputeViewport(); // função que você cria (abaixo)
+        RecomputeViewport();
 
         camera = new Camera2D(VIRTUAL_W, VIRTUAL_H);
 
@@ -111,7 +113,9 @@ public class Game1 : Game
         var bodyOffHand  = Content.Load<Texture2D>("player/playerAnimationOffHand");
         var attackSheet  = Content.Load<Texture2D>("player/playerAttack");
 
-        player = new Player(bodyWithArm, bodyOffHand, attackSheet);
+        // === Lê config do player do JSON e instancia o Player com ela ===
+        playerCfg = JsonLoader.LoadFromContent<PlayerConfig>("Data/player.json");
+        player = new Player(bodyWithArm, bodyOffHand, attackSheet, playerCfg);
         
         enemySheet = Content.Load<Texture2D>("enemy/Enemy");
         enemies.Add(new Enemy(enemySheet, new Vector2(260, 90))); // spawn do inimigo
@@ -120,8 +124,8 @@ public class Game1 : Game
         WhitePixel.SetData(new[] { Color.White });
 
         // === MAPA: cria, gera e expõe no ponteiro estático ===
-        int widthTiles  = 400;           // pode ajustar depois
-        int heightTiles = 220;           // idem
+        int widthTiles  = 400;           // pode ajustar depois (ou vir de preset JSON futuramente)
+        int heightTiles = 220;
 
         map = new Map(GraphicsDevice, widthTiles, heightTiles, tileSize, seed: 1337);
         map.Regenerate();                // superfície + cavernas + minério
@@ -130,30 +134,21 @@ public class Game1 : Game
         // Calcula spawn central
         Point spawnTile = map.FindCenterSpawnTile();
 
-        // Vamos posicionar o player acima do chão, no centro horizontal do tile.
-        // OBS: Como não sabemos a altura do seu player, posiciono um pouco acima e a gravidade assenta.
+        // Posiciona o player acima do chão
         Vector2 spawnWorldCenter = map.TileCenterToWorld(spawnTile.X, spawnTile.Y);
         Vector2 spawnWorld = new Vector2(spawnWorldCenter.X, spawnWorldCenter.Y - map.TileSize * 0.6f);
 
-        // Ajusta a posição do player (use o método que você tiver: SetPosition/Teleport/Position)
         if (player is not null)
         {
-            // tente o que existir no seu Player:
-            // player.SetPosition(spawnWorld);
-            // player.Teleport(spawnWorld);
-            player.Position = spawnWorld; // se a propriedade for pública
+            player.Position = spawnWorld;
         }
 
-        // (Opcional) centraliza a câmera já no primeiro frame, se sua Camera2D tiver método pra isso:
+        // (Opcional) centraliza a câmera já no primeiro frame
         try
         {
-            // Ex.: se existir um método CenterOn/SnapTo
             // camera.CenterOn(spawnWorld);
-            // camera.SnapTo(spawnWorld);
         }
         catch {}
- 
-        // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
@@ -172,7 +167,7 @@ public class Game1 : Game
         }
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (mode == GameMode.Paused)
+        if (mode == GameMode.Paused)
         {
             // navegação
             bool up    = _currKey.IsKeyDown(Keys.Up)    && !_prevKey.IsKeyDown(Keys.Up);
@@ -184,66 +179,55 @@ public class Game1 : Game
             if (up)   menuIndex = (menuIndex - 1 + menu.Length) % menu.Length;
             if (down) menuIndex = (menuIndex + 1) % menu.Length;
 
-            // “Zoom - / Zoom +” respondem à esquerda/direita (ou Enter também)
             if (menuIndex == 0 && (left || enter))
-            {
-                camera.SetZoom(camera.Zoom - ZoomStep); // usa clamp interno do Camera2D
-            }
-            if (menuIndex == 1 && (right || enter))
-            {
-                camera.SetZoom(camera.Zoom + ZoomStep);
-            }
+                camera.SetZoom(camera.Zoom - ZoomStep);
 
-            // Reiniciar
+            if (menuIndex == 1 && (right || enter))
+                camera.SetZoom(camera.Zoom + ZoomStep);
+
             if (menuIndex == 2 && enter)
             {
                 ResetGame();
                 mode = GameMode.Playing;
             }
 
-            // Sair
             if (menuIndex == 3 && enter)
             {
                 Exit();
             }
 
             base.Update(gameTime);
-            return; // IMPORTANTE: não atualiza mundo enquanto pausado
+            return; // não atualiza mundo enquanto pausado
         }
 
         // === Mouse (tela real) -> coords virtuais -> mundo (camera) ===
         var ms = Microsoft.Xna.Framework.Input.Mouse.GetState();
         int mx = ms.X, my = ms.Y;
 
-        // Remove offset do letterbox/pillarbox
         int sx = mx - letterboxVP.X;
         int sy = my - letterboxVP.Y;
 
         Vector2 mouseWorld;
         if (sx >= 0 && sy >= 0 && sx < letterboxVP.Width && sy < letterboxVP.Height && scaleInt > 0)
         {
-            // volta para a resolução virtual pixel-perfect
             Vector2 virt = new Vector2(sx / (float)scaleInt, sy / (float)scaleInt);
-
-            // remove a transformação da câmera
             Matrix inv = Matrix.Invert(camera.Transform);
             mouseWorld = Vector2.Transform(virt, inv);
         }
         else
         {
-            // fallback: se o mouse estiver fora do viewport, só inverte a câmera da posição bruta
             Matrix inv = Matrix.Invert(camera.Transform);
             mouseWorld = Vector2.Transform(new Vector2(mx, my), inv);
         }
 
-        // entrega ao Player (como você já faz hoje)
-        player.SetMouseWorld(mouseWorld);  // :contentReference[oaicite:2]{index=2}
+        // entrega ao Player
+        player.SetMouseWorld(mouseWorld);
 
         // === Atualiza Player ===
-        player.Update(gameTime);           // :contentReference[oaicite:3]{index=3}
+        player.Update(gameTime);
 
-        // === Dano por ataque do Player nos inimigos (igual ao teu) ===
-        if (player.TryGetAttackHitbox(out var atk))   // :contentReference[oaicite:4]{index=4}
+        // === Dano por ataque do Player nos inimigos (agora usando GetBaseDamage()) ===
+        if (player.TryGetAttackHitbox(out var atk))
         {
             foreach (var e in enemies)
             {
@@ -252,29 +236,30 @@ public class Game1 : Game
                     int dir = Math.Sign(e.Position.X - player.GetPosition().X);
 
                     var hit = new HitInfo(
-                        dmg: 20, dirX: dir,
+                        dmg: player.GetBaseDamage(), // ← vem do JSON via Player
+                        dirX: dir,
                         kbX: 200f, kbY: 80f,
                         stun: 0.10f,
                         src: Faction.Player,
                         tag: "Slash"
                     );
-                    damage.Enqueue(e, in hit);       // :contentReference[oaicite:5]{index=5}
+                    damage.Enqueue(e, in hit);
                 }
             }
         }
 
-        // === Atualiza inimigos, limpa mortos, despacha danos (igual ao teu) ===
+        // === Atualiza inimigos, limpa mortos, despacha danos ===
         foreach (var e in enemies)
-            e.Update(gameTime, player, this);        // :contentReference[oaicite:6]{index=6}
+            e.Update(gameTime, player, this);
 
-        enemies.RemoveAll(e => e.IsDead);            // :contentReference[oaicite:7]{index=7}
-        damage.DispatchAll();                        // :contentReference[oaicite:8]{index=8}
+        enemies.RemoveAll(e => e.IsDead);
+        damage.DispatchAll();
 
-        // === Câmera segue o player (igual ao teu) ===
-        camera.FollowSmooth(player.GetPosition(), dt, 17, 23);         // :contentReference[oaicite:9]{index=9}
+        // === Câmera segue o player ===
+        camera.FollowSmooth(player.GetPosition(), dt, 17, 23);
 
-        // === Reset se player morreu (igual ao teu) ===
-        if (player.Health <= 0)                      // :contentReference[oaicite:10]{index=10}
+        // === Reset se player morreu ===
+        if (player.Health <= 0)
         {
             ResetGame();
             return;
@@ -285,12 +270,12 @@ public class Game1 : Game
     
     private void ResetGame()
     {
-        // replay caso player morra
+        // replay caso player morra: reusa a mesma config já carregada
         var bodyWithArm  = Content.Load<Texture2D>("player/playerAnimation");
         var bodyOffHand  = Content.Load<Texture2D>("player/playerAnimationOffHand");
         var attackSheet  = Content.Load<Texture2D>("player/playerAttack");
 
-        player = new Player(bodyWithArm, bodyOffHand, attackSheet);
+        player = new Player(bodyWithArm, bodyOffHand, attackSheet, playerCfg);
 
         enemies.Clear();
         enemies.Add(new Enemy(enemySheet, new Vector2(260, 90)));
@@ -298,8 +283,6 @@ public class Game1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
-
-        // TODO: Add your drawing code here
         GraphicsDevice.SetRenderTarget(worldRT);
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
@@ -309,17 +292,15 @@ public class Game1 : Game
             transformMatrix: camera.Transform
         );
 
-            Point viewWorld = camera.ViewportWorldSize; // já considera o Zoom
-            Vector2 topLeft = camera.TopLeftWorld; 
+        Point viewWorld = camera.ViewportWorldSize; // já considera o Zoom
+        Vector2 topLeft = camera.TopLeftWorld; 
 
-            map.Draw(_spriteBatch, viewWorld, topLeft);
+        map.Draw(_spriteBatch, viewWorld, topLeft);
 
-            // Player e inimigos continuam logo depois
-            player.Draw(_spriteBatch);
-            foreach (var e in enemies) e.Draw(_spriteBatch);
+        // Player e inimigos
+        player.Draw(_spriteBatch);
+        foreach (var e in enemies) e.Draw(_spriteBatch);
 
-            player.Draw(_spriteBatch);                // usa internamente ManagerAnimation/Attack etc. 
-            foreach (var e in enemies) e.Draw(_spriteBatch);  // :contentReference[oaicite:4]{index=4}
         _spriteBatch.End();
 
         // 2) UI no RT próprio (se quiser HUD/menus separados)
@@ -330,10 +311,8 @@ public class Game1 : Game
         {
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
 
-            // overlay cobrindo a tela virtual inteira (NÃO multiplica por scaleInt aqui)
             _spriteBatch.Draw(WhitePixel, new Rectangle(0, 0, VIRTUAL_W, VIRTUAL_H), new Color(0, 0, 0, 140));
 
-            // painel central em coordenadas VIRTUAIS
             int panelW = 320, panelH = 180;
             int px = (VIRTUAL_W - panelW) / 2;
             int py = (VIRTUAL_H - panelH) / 2;
@@ -366,9 +345,8 @@ public class Game1 : Game
         }
         else
         {
-            // HUD normal (se tiver)
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-            // ... desenhe HUD aqui ...
+            // ... HUD normal aqui, se houver ...
             _spriteBatch.End();
         }
 
