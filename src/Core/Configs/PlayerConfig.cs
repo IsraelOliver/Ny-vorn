@@ -11,9 +11,9 @@ public class PlayerConfig
 public class StatsConfig
 {
     public int Health { get; set; } = 100;
-    public int maxHealth { get; set; } = 100;
+    public int MaxHealth { get; set; } = 100;
     public int DarkEnergy { get; set; } = 10;
-    public int MaxDarkEnery { get; set; } = 100;
+    public int MaxDarkEnergy { get; set; } = 100;
 }
 
 public class MovementConfig

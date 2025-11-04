@@ -12,7 +12,7 @@ public partial class Player : IDamageable
     public int Health { get; private set; } = 100; // Vida do player.
     public int MaxHealth { get; private set; } = 100;
     public int DarkEnergy { get; private set; } = 10;
-    public int MaxDarkEnery { get; private set; } = 100;
+    public int MaxDarkEnergy { get; private set; } = 100;
     
     public Vector2 Position, Velocity;
     private bool facingLeft = false; // sensor para verificar o lado do player.
@@ -101,7 +101,7 @@ public partial class Player : IDamageable
 
         // vida inicial
         Health = cfg.Stats.Health;
-        MaxHealth = cfg.Stats.maxHealth;
+        MaxHealth = cfg.Stats.MaxHealth;
         if (Health > MaxHealth)
         {
             Health = MaxHealth;
@@ -109,10 +109,10 @@ public partial class Player : IDamageable
 
         // Eneria Inicial
         DarkEnergy = cfg.Stats.DarkEnergy;
-        MaxDarkEnery = cfg.Stats.MaxDarkEnery;
-        if (DarkEnergy > MaxDarkEnery)
+        MaxDarkEnergy = cfg.Stats.MaxDarkEnergy;
+        if (DarkEnergy > MaxDarkEnergy)
         {
-            DarkEnergy = MaxDarkEnery;
+            DarkEnergy = MaxDarkEnergy;
         }
     }
 
