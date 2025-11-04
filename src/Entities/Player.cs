@@ -10,6 +10,9 @@ namespace Nyvorn;
 public partial class Player : IDamageable
 {
     public int Health { get; private set; } = 100; // Vida do player.
+    public int MaxHealth { get; private set; } = 100;
+    public int DarkEnergy { get; private set; } = 10;
+    public int MaxDarkEnery { get; private set; } = 100;
     
     public Vector2 Position, Velocity;
     private bool facingLeft = false; // sensor para verificar o lado do player.
@@ -69,7 +72,6 @@ public partial class Player : IDamageable
         cfg = config ?? new PlayerConfig();
 
         animManager = new ManagerAnimation(bodyWithArm, bodyOffHand);
-        Position = new Vector2(100, 100);
 
         // --- aplica MOVIMENTO do JSON ---
         walkSpeed   = cfg.Movement.WalkSpeed;

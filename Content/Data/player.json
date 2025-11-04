@@ -2,7 +2,7 @@
   "stats": {
     "health": 100,
     "maxHealth": 100,
-    "darkEnergy": 100,
+    "darkEnergy": 10,
     "maxDarkEnergy": 100
   },
   
