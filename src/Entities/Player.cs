@@ -80,6 +80,7 @@ public partial class Player : IDamageable
         jumpSpeed   = cfg.Movement.JumpSpeed;
         CoyoteTime     = cfg.Movement.CoyoteTime;
         JumpBufferTime = cfg.Movement.JumpBuffer;
+        
 
         // --- aplica ATAQUE do JSON ---
         attackDuration = cfg.Attack.Duration;
@@ -100,6 +101,19 @@ public partial class Player : IDamageable
 
         // vida inicial
         Health = cfg.Stats.Health;
+        MaxHealth = cfg.Stats.maxHealth;
+        if (Health > MaxHealth)
+        {
+            Health = MaxHealth;
+        }
+
+        // Eneria Inicial
+        DarkEnergy = cfg.Stats.DarkEnergy;
+        MaxDarkEnery = cfg.Stats.MaxDarkEnery;
+        if (DarkEnergy > MaxDarkEnery)
+        {
+            DarkEnergy = MaxDarkEnery;
+        }
     }
 
     public void Update(GameTime gameTime)
