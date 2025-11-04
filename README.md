@@ -9,7 +9,7 @@
 
 ![preview do projeto](https://raw.githubusercontent.com/IsraelOliver/Ny-vorn/main/GitHub/footage.png)
 
-Nesta cena, temos o **player** (preto) e um **inimigo** (roxo), usados para testes.  
+Nesta cena, temos o **player** (preto) e um **inimigo** (roxo), usados para testes em um mundo totalmente procedural, onde o marrom e o terra, o branco e pedra e o preto sao cavernas!.  
 Essa é a **versão base**, que já conta com:
   - Gravidade e colisão sólida  
   - Sprint, pulo e ataque com hitbox real  
