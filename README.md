@@ -20,7 +20,7 @@ ________________________________________________________________________________
 
 ## 🕹️ Baixar o jogo
 
-👉 [**Baixar Nyvorn v0.1.0 (Windows x64)**](https://github.com/IsraelOliver/Ny-vorn/releases/tag/v0.1.0)
+👉 [**Baixar Nyvorn v0.2.0 - Procedural World Update (Windows x64)**](https://github.com/IsraelOliver/Ny-vorn/releases/tag/v0.2.0)
 
 Versão **self-contained** — não precisa instalar .NET.  
 Basta extrair o `.zip` e rodar `Nyvorn.exe`.
