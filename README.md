@@ -9,7 +9,7 @@
 
 ![preview do projeto](https://raw.githubusercontent.com/IsraelOliver/Ny-vorn/main/GitHub/footage.png)
 
-Nesta cena, temos o **player** (preto) e um **inimigo** (roxo), usados para testes em um mundo totalmente procedural, onde o marrom e o terra, o branco e pedra e o preto sao cavernas!.  
+Nesta cena, temos o **player** (preto) e um **inimigo** (roxo), usados para testes em um mundo totalmente procedural, onde o marrom e o terra, o branco e pedra e o preto são cavernas!.  
 Essa é a **versão base**, que já conta com:
   - Gravidade e colisão sólida  
   - Sprint, pulo e ataque com hitbox real  
@@ -45,7 +45,7 @@ Cada iteração aproxima o projeto da visão completa de um **sandbox de horror 
 
 🎮 Características
   - Pixel art atmosférica
-    + Ideia para o futuro: Queia fazer um mundo que fosse totalmente moldavel com pixels mesmo, em vez de tiles ou blocos. Cada pixel pode ser  alterado.
+    + Ideia para o futuro: Queria fazer um mundo que fosse totalmente moldável com pixels mesmo, em vez de tiles ou blocos. Cada pixel pode ser  alterado.
   - Construção e destruição de terreno 
   - Crafting e progressão mental
   - Exploração e narrativa ramificada
